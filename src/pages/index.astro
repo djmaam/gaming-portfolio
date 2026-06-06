@@ -14,15 +14,17 @@ import StartMenu from '../components/StartMenu.astro';
   <HudBar />
   <TitleBlock />
 
-  <div class="char-stats-grid">
-    <CharacterCard />
-    <AbilityStats />
-  </div>
+  <div class="panels-stack">
+    <div class="char-stats-grid">
+      <CharacterCard />
+      <AbilityStats />
+    </div>
 
-  <QuestLog />
-  <SkillTree />
-  <WorldMap />
-  <StartMenu />
+    <QuestLog />
+    <SkillTree />
+    <WorldMap />
+    <StartMenu />
+  </div>
 
   <footer class="site-footer">
     © 20XX MARCOS ARRIETA · INSERT COIN TO CONTINUE
@@ -30,11 +32,16 @@ import StartMenu from '../components/StartMenu.astro';
 </Base>
 
 <style>
+  .panels-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
   .char-stats-grid {
     display: grid;
     grid-template-columns: 300px 1fr;
     gap: 20px;
-    margin-bottom: 20px;
   }
 
   .site-footer {

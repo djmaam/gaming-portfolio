@@ -102,3 +102,27 @@ const menuItems = [
     color: var(--c-ink);
   }
 </style>
+
+<script>
+  const list = document.getElementById('start-menu-list');
+  if (list) {
+    const rows = Array.from(list.querySelectorAll<HTMLElement>('.menu-row'));
+    let selected = 0;
+
+    function select(i: number) {
+      rows[selected].classList.remove('menu-row--selected');
+      selected = (i + rows.length) % rows.length;
+      rows[selected].classList.add('menu-row--selected');
+      (rows[selected].querySelector('a,button') as HTMLElement | null)?.focus();
+    }
+
+    list.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); select(selected + 1); }
+      if (e.key === 'ArrowUp')   { e.preventDefault(); select(selected - 1); }
+    });
+
+    rows.forEach((row, i) => {
+      row.addEventListener('mouseenter', () => select(i));
+    });
+  }
+</script>

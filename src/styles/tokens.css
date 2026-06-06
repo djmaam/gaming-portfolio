@@ -130,6 +130,8 @@ html, body {
 .panel-label--yellow::before { background: var(--c-yellow); }
 .panel-label--cyan   { color: var(--c-cyan);   }
 .panel-label--cyan::before   { background: var(--c-cyan); }
+.panel-label--pink   { color: var(--c-pink);   }
+.panel-label--pink::before   { background: var(--c-pink); }
 
 /* Raised inner cell (skill cards, active row, map nodes) */
 .raised-cell {
@@ -138,6 +140,8 @@ html, body {
 }
 
 /* Blink utility */
-.blink {
-  animation: blink 1.1s steps(1) infinite;
+@media (prefers-reduced-motion: no-preference) {
+  .blink {
+    animation: blink 1.1s steps(1) infinite;
+  }
 }

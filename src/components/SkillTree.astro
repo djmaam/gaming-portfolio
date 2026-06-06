@@ -17,7 +17,7 @@ const RARITY = [
     {portfolio.skills.map((group, i) => {
       const r = RARITY[i];
       return (
-        <div class="skill-card raised-cell" style={`box-shadow:0 0 0 2px ${r.color},inset -2px -2px 0 rgba(0,0,0,.3)`}>
+        <div class="skill-card" style={`box-shadow:0 0 0 2px ${r.color},inset -2px -2px 0 rgba(0,0,0,.3)`}>
           <div class="skill-card__header">
             <span class="skill-card__group" style={`color:${r.color}`}>◆ {group.group}</span>
             <span class="skill-card__tag" style={`color:${r.color}`}>{r.tag}</span>
@@ -43,11 +43,16 @@ const RARITY = [
   .skill-card {
     background: var(--c-panelHi);
     padding: 10px;
-    transition: transform 0.1s;
   }
 
-  .skill-card:hover {
-    transform: translateY(-3px);
+  @media (prefers-reduced-motion: no-preference) {
+    .skill-card {
+      transition: transform 0.1s;
+    }
+
+    .skill-card:hover {
+      transform: translateY(-3px);
+    }
   }
 
   .skill-card__header {

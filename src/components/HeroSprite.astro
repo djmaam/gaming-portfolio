@@ -7,12 +7,15 @@ export interface Props {
 }
 
 const { cellSize = 12, float = true } = Astro.props;
-const size = SP.length * cellSize;
+const cols = SP[0].length;
+const rows = SP.length;
+const width = cols * cellSize;
+const height = rows * cellSize;
 ---
 
 <div
   class:list={['sprite', float && 'sprite--float']}
-  style={`width:${size}px;height:${size}px;grid-template-columns:repeat(16,${cellSize}px);grid-template-rows:repeat(16,${cellSize}px);`}
+  style={`width:${width}px;height:${height}px;grid-template-columns:repeat(${cols},${cellSize}px);grid-template-rows:repeat(${rows},${cellSize}px);`}
   aria-hidden="true"
 >
   {SP.map(row =>

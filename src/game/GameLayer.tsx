@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { useGameState } from './useGameState';
 import { mount as mountCursor } from './menuCursor';
+import { mount as mountWorldMap } from './worldMap';
 import './GameLayer.css';
 
 const BOOT_MS = 1200;
@@ -55,7 +56,10 @@ export default function GameLayer() {
   const onTitle = useCallback(() => advance('EXPLORE'), [advance]);
 
   useEffect(() => {
-    if (state === 'EXPLORE') return mountCursor();
+    if (state !== 'EXPLORE') return;
+    const cleanupCursor   = mountCursor();
+    const cleanupWorldMap = mountWorldMap();
+    return () => { cleanupCursor(); cleanupWorldMap(); };
   }, [state]);
 
   if (state === 'EXPLORE') return null;

@@ -1,0 +1,167 @@
+/* Hero layer */
+.wm-hero-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.wm-hero-canvas {
+  position: absolute;
+  left: 11px; /* center 32px canvas in 54px rail: (54 - 32) / 2 */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.wm-enter-prompt {
+  position: absolute;
+  left: 0;
+  width: 54px;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--c-yellow);
+  letter-spacing: 1px;
+}
+
+/* Active node (hero is near, not current) */
+.wm-node--active {
+  background: var(--c-yellow);
+  color: var(--c-bg0);
+  box-shadow: 0 0 0 3px var(--c-bg0), 0 0 0 5px var(--c-yellow);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wm-node--active {
+    animation: wm-node-pulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes wm-node-pulse {
+    0%, 100% { filter: drop-shadow(0 0 0px transparent); }
+    50%      { filter: drop-shadow(0 0 7px rgba(255, 210, 77, 0.9)); }
+  }
+}
+
+/* Dialog */
+.wm-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(7, 6, 17, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.wm-dialog-panel {
+  background: var(--c-panel);
+  box-shadow: 0 0 0 3px var(--c-bg0), 0 0 0 6px var(--c-blue), 0 6px 0 6px rgba(0, 0, 0, 0.4);
+  padding: 20px 24px;
+  width: min(520px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wm-dialog-panel {
+    animation: wm-dialog-pop 0.2s ease-out forwards;
+  }
+
+  @keyframes wm-dialog-pop {
+    0%   { transform: scale(0.75); opacity: 0;   }
+    50%  { transform: scale(0.92); opacity: 0.7; }
+    80%  { transform: scale(1.04); opacity: 1;   }
+    100% { transform: scale(1);    opacity: 1;   }
+  }
+}
+
+.wm-dialog__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--c-panelHi);
+}
+
+.wm-dialog__company {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: var(--c-ink);
+  line-height: 1.4;
+}
+
+.wm-dialog__status {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  flex-shrink: 0;
+  align-self: center;
+}
+.wm-dialog__status--now     { color: var(--c-green); }
+.wm-dialog__status--cleared { color: var(--c-yellow); }
+
+.wm-dialog__role,
+.wm-dialog__gear,
+.wm-dialog__quest {
+  font-family: 'Silkscreen', monospace;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.wm-dialog__role  { font-size: var(--fs-role); color: var(--c-cyan); }
+.wm-dialog__gear  { font-size: var(--fs-tech); color: var(--c-dim); }
+.wm-dialog__quest { font-size: var(--fs-tech); color: var(--c-faint); }
+
+.wm-dialog__lbl {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--c-faint);
+  flex-shrink: 0;
+}
+
+.wm-dialog__nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 2px solid var(--c-panelHi);
+}
+
+.wm-dialog__btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 8px 12px;
+  background: var(--c-panelHi);
+  color: var(--c-ink);
+  border: 2px solid var(--c-faint);
+  cursor: pointer;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.wm-dialog__btn:hover:not(:disabled),
+.wm-dialog__btn:focus-visible {
+  border-color: var(--c-blue);
+  color: var(--c-cyan);
+  outline: none;
+}
+
+.wm-dialog__btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.wm-dialog__btn--close {
+  border-color: var(--c-blue);
+  color: var(--c-blue);
+}
+
+.wm-dialog__btn--close:hover,
+.wm-dialog__btn--close:focus-visible {
+  background: var(--c-blue);
+  color: var(--c-bg0);
+}

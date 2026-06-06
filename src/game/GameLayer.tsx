@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useGameState } from './useGameState';
+import { mount as mountCursor } from './menuCursor';
 import './GameLayer.css';
 
 const BOOT_MS = 1200;
@@ -52,6 +53,10 @@ export default function GameLayer() {
   const { state, advance } = useGameState();
   const onBoot = useCallback(() => advance('TITLE'), [advance]);
   const onTitle = useCallback(() => advance('EXPLORE'), [advance]);
+
+  useEffect(() => {
+    if (state === 'EXPLORE') return mountCursor();
+  }, [state]);
 
   if (state === 'EXPLORE') return null;
   if (state === 'BOOT') return <BootOverlay onDone={onBoot} />;

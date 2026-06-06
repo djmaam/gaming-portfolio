@@ -17,7 +17,7 @@ export function useGameState() {
   }, []);
 
   const advance = useCallback((to: GameState) => {
-    if (to === 'EXPLORE') {
+    if (to === 'TITLE' || to === 'EXPLORE') {
       sessionStorage.setItem(BOOTED_KEY, '1');
     }
     setState(to);

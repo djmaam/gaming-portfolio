@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useGameState } from './useGameState';
 import './GameLayer.css';
 
@@ -37,13 +37,12 @@ function TitleOverlay({ onStart }: { onStart: () => void }) {
 
   return (
     <div className="gp-title" onClick={onStart} role="button" tabIndex={0}
-         aria-label="Press to start — enter the portfolio"
-         onKeyDown={e => e.key === 'Enter' && onStart()}>
+         aria-label="Press to start — enter the portfolio">
       <div>
         <h1 className="gp-title__logo">MARCOS<br />ARRIETA</h1>
         <p className="gp-title__sub">FULL-STACK MAGE · LV.99</p>
       </div>
-      <p className="gp-title__press">▶ PRESS START ◀</p>
+      <p className="gp-title__press blink">▶ PRESS START ◀</p>
       <p className="gp-title__hint">↑↓←→ move · Z select · M mute</p>
     </div>
   );
@@ -51,8 +50,10 @@ function TitleOverlay({ onStart }: { onStart: () => void }) {
 
 export default function GameLayer() {
   const { state, advance } = useGameState();
+  const onBoot = useCallback(() => advance('TITLE'), [advance]);
+  const onTitle = useCallback(() => advance('EXPLORE'), [advance]);
 
   if (state === 'EXPLORE') return null;
-  if (state === 'BOOT') return <BootOverlay onDone={() => advance('TITLE')} />;
-  return <TitleOverlay onStart={() => advance('EXPLORE')} />;
+  if (state === 'BOOT') return <BootOverlay onDone={onBoot} />;
+  return <TitleOverlay onStart={onTitle} />;
 }

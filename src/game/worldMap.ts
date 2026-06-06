@@ -34,7 +34,7 @@ export function mount(): () => void {
     return p;
   }
 
-  function renderDialog() {
+  function renderDialog(trigger: 'open' | 'prev' | 'next' = 'open') {
     dialogEl?.remove();
     const job       = jobs[currentJob];
     const isCurrent = currentJob === 0;
@@ -68,7 +68,7 @@ export function mount(): () => void {
     prev.className   = 'wm-dialog__btn';
     prev.textContent = '◀ PREV';
     prev.disabled    = currentJob === 0;
-    prev.addEventListener('click', () => { if (currentJob > 0) { currentJob--; renderDialog(); } });
+    prev.addEventListener('click', () => { if (currentJob > 0) { currentJob--; renderDialog('prev'); } });
     const close = document.createElement('button');
     close.className   = 'wm-dialog__btn wm-dialog__btn--close';
     close.textContent = 'CLOSE';
@@ -77,7 +77,7 @@ export function mount(): () => void {
     next.className   = 'wm-dialog__btn';
     next.textContent = 'NEXT ▶';
     next.disabled    = currentJob === jobs.length - 1;
-    next.addEventListener('click', () => { if (currentJob < jobs.length - 1) { currentJob++; renderDialog(); } });
+    next.addEventListener('click', () => { if (currentJob < jobs.length - 1) { currentJob++; renderDialog('next'); } });
     nav.append(prev, close, next);
 
     panel.append(
@@ -91,7 +91,10 @@ export function mount(): () => void {
     backdrop.appendChild(panel);
     document.body.appendChild(backdrop);
     dialogEl = backdrop;
-    close.focus();
+    // Keep focus near the button that triggered nav; fall back to CLOSE
+    if (trigger === 'prev' && !prev.disabled) prev.focus();
+    else if (trigger === 'next' && !next.disabled) next.focus();
+    else close.focus();
   }
 
   function openDialog(index: number) {
@@ -104,8 +107,8 @@ export function mount(): () => void {
   const onDialogKey = (e: KeyboardEvent) => {
     if (!dialogOpen) return;
     if (e.key === 'Escape') { e.preventDefault(); closeDialog(); return; }
-    if (e.key === 'ArrowLeft'  && currentJob > 0)               { currentJob--; renderDialog(); }
-    if (e.key === 'ArrowRight' && currentJob < jobs.length - 1) { currentJob++; renderDialog(); }
+    if (e.key === 'ArrowLeft'  && currentJob > 0)               { currentJob--; renderDialog('prev'); }
+    if (e.key === 'ArrowRight' && currentJob < jobs.length - 1) { currentJob++; renderDialog('next'); }
   };
   window.addEventListener('keydown', onDialogKey);
 
@@ -146,13 +149,26 @@ export function mount(): () => void {
 
   // Node Y centers relative to timeline top
   const nodeButtons = Array.from(timeline.querySelectorAll<HTMLElement>('.wm-node'));
-  const tlRect = timeline.getBoundingClientRect();
-  const nodeYs = nodeButtons.map(btn => {
-    const r = btn.getBoundingClientRect();
-    return (r.top + r.height / 2) - tlRect.top;
+
+  const measureNodes = () => {
+    const tlRect = timeline.getBoundingClientRect();
+    return nodeButtons.map(btn => {
+      const r = btn.getBoundingClientRect();
+      return (r.top + r.height / 2) - tlRect.top;
+    });
+  };
+
+  let nodeYs = measureNodes();
+  if (nodeYs.length === 0) return () => { layer.remove(); timeline.style.position = ''; };
+
+  let minY = nodeYs[0];
+  let maxY = nodeYs[nodeYs.length - 1];
+
+  // Re-measure after fonts swap in — Press Start 2P/Silkscreen shift node heights on cold load
+  document.fonts.ready.then(() => {
+    nodeYs = measureNodes();
+    if (nodeYs.length > 0) { minY = nodeYs[0]; maxY = nodeYs[nodeYs.length - 1]; }
   });
-  const minY = nodeYs[0];
-  const maxY = nodeYs[nodeYs.length - 1];
 
   // Draw sprite onto canvas; bobOffset shifts sprite 1 row (2px) for walk animation
   const ctx = canvas.getContext('2d')!;
@@ -176,12 +192,15 @@ export function mount(): () => void {
   const keys = new Set<string>();
 
   const onKeyDown = (e: KeyboardEvent) => {
+    const active = document.activeElement as HTMLElement;
+    if (active?.tagName === 'INPUT' || active?.tagName === 'TEXTAREA') return;
     if (['ArrowUp', 'ArrowDown', 'w', 'W', 's', 'S'].includes(e.key)) {
       e.preventDefault();
       if (!dialogOpen) keys.add(e.key);
     }
     if ((e.key === 'z' || e.key === 'Z' || e.key === 'Enter') && activeNode !== -1 && !dialogOpen) {
-      openDialog(activeNode);
+      const menuList = document.getElementById('start-menu-list');
+      if (!menuList?.contains(active)) openDialog(activeNode);
     }
   };
   const onKeyUp = (e: KeyboardEvent) => keys.delete(e.key);

@@ -1,0 +1,128 @@
+---
+import PixelPanel from './PixelPanel.astro';
+import { portfolio } from '../data/portfolio';
+
+const menuItems = [
+  { key: 'GITHUB',   color: 'var(--c-green)',  value: portfolio.links.github,   href: 'https://github.com/djmaam', external: true  },
+  { key: 'LINKEDIN', color: 'var(--c-blue)',   value: portfolio.links.linkedin, href: 'https://linkedin.com/in/djmaam', external: true },
+  { key: 'WEBSITE',  color: 'var(--c-pink)',   value: portfolio.links.web,      href: 'https://marcosarrieta.ar', external: false },
+  { key: 'CONTACT',  color: 'var(--c-cyan)',   value: 'SEND A MESSAGE',         href: '#contact', external: false, isContact: true },
+];
+---
+
+<PixelPanel accent="cyan" label="START MENU · GET IN TOUCH" class="start-menu">
+  <nav aria-label="Contact and links">
+    <ul class="menu-list" id="start-menu-list">
+      {menuItems.map((item, i) => (
+        <li class:list={['menu-row', i === 0 && 'menu-row--selected']} data-menu-index={i}>
+          <span class="menu-row__cursor blink" aria-hidden="true">►</span>
+          {item.isContact
+            ? (
+              <button
+                class="menu-row__key"
+                style={`color:${item.color}`}
+                id="contact-trigger"
+                aria-haspopup="dialog"
+              >
+                {item.key}
+              </button>
+            )
+            : (
+              <a
+                class="menu-row__key"
+                style={`color:${item.color}`}
+                href={item.href}
+                {...item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+              >
+                {item.key}
+              </a>
+            )
+          }
+          <span class="menu-row__value">{item.value}</span>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</PixelPanel>
+
+<style>
+  .menu-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .menu-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 0;
+  }
+
+  .menu-row--selected {
+    background: var(--c-panelHi);
+    box-shadow: 0 0 0 2px var(--c-cyan);
+  }
+
+  .menu-row__cursor {
+    color: var(--c-yellow);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    width: 12px;
+    flex-shrink: 0;
+    visibility: hidden;
+  }
+
+  .menu-row--selected .menu-row__cursor {
+    visibility: visible;
+  }
+
+  .menu-row__key {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    min-width: 110px;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+  }
+
+  .menu-row__key:focus-visible {
+    outline: 2px solid var(--c-yellow);
+    outline-offset: 2px;
+  }
+
+  .menu-row__value {
+    font-family: 'Silkscreen', monospace;
+    font-size: var(--fs-link-val);
+    color: var(--c-ink);
+  }
+</style>
+
+<script>
+  const list = document.getElementById('start-menu-list');
+  if (list) {
+    const rows = Array.from(list.querySelectorAll<HTMLElement>('.menu-row'));
+    let selected = 0;
+
+    function select(i: number) {
+      rows[selected].classList.remove('menu-row--selected');
+      selected = (i + rows.length) % rows.length;
+      rows[selected].classList.add('menu-row--selected');
+      (rows[selected].querySelector('a,button') as HTMLElement | null)?.focus();
+    }
+
+    list.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); select(selected + 1); }
+      if (e.key === 'ArrowUp')   { e.preventDefault(); select(selected - 1); }
+    });
+
+    rows.forEach((row, i) => {
+      row.addEventListener('mouseenter', () => select(i));
+    });
+  }
+</script>

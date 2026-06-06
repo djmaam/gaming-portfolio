@@ -1,0 +1,61 @@
+---
+import Base from '../layouts/Base.astro';
+import HudBar from '../components/HudBar.astro';
+import TitleBlock from '../components/TitleBlock.astro';
+import CharacterCard from '../components/CharacterCard.astro';
+import AbilityStats from '../components/AbilityStats.astro';
+import QuestLog from '../components/QuestLog.astro';
+import SkillTree from '../components/SkillTree.astro';
+import WorldMap from '../components/WorldMap.astro';
+import StartMenu from '../components/StartMenu.astro';
+---
+
+<Base>
+  <HudBar />
+  <TitleBlock />
+
+  <div class="panels-stack">
+    <div class="char-stats-grid">
+      <CharacterCard />
+      <AbilityStats />
+    </div>
+
+    <QuestLog />
+    <SkillTree />
+    <WorldMap />
+    <StartMenu />
+  </div>
+
+  <footer class="site-footer">
+    © 20XX MARCOS ARRIETA · INSERT COIN TO CONTINUE
+  </footer>
+</Base>
+
+<style>
+  .panels-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .char-stats-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+  }
+
+  .site-footer {
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: var(--fs-footer);
+    color: var(--c-faint);
+    letter-spacing: 1px;
+    padding: 24px 0 12px;
+  }
+
+  @media (max-width: 680px) {
+    .char-stats-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

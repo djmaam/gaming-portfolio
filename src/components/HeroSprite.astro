@@ -1,0 +1,39 @@
+---
+import { SP, cmap } from '../data/portfolio';
+
+export interface Props {
+  cellSize?: number;
+  float?: boolean;
+}
+
+const { cellSize = 12, float = true } = Astro.props;
+const cols = SP[0].length;
+const rows = SP.length;
+const width = cols * cellSize;
+const height = rows * cellSize;
+---
+
+<div
+  class:list={['sprite', float && 'sprite--float']}
+  style={`width:${width}px;height:${height}px;grid-template-columns:repeat(${cols},${cellSize}px);grid-template-rows:repeat(${rows},${cellSize}px);`}
+  aria-hidden="true"
+>
+  {SP.map(row =>
+    row.split('').map((ch, j) => (
+      <div style={`background:${cmap[ch] ?? 'transparent'}`} />
+    ))
+  )}
+</div>
+
+<style>
+  .sprite {
+    display: grid;
+    image-rendering: pixelated;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sprite--float {
+      animation: floaty 2.4s ease-in-out infinite;
+    }
+  }
+</style>

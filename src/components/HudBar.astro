@@ -1,0 +1,103 @@
+---
+// Panel A — HUD Bar
+---
+
+<div class="hud">
+  <span class="hud__1up">1UP</span>
+
+  <span class="hud__label hud__label--hp">HP</span>
+  <div class="hud__bar hud__bar--hp" role="meter" aria-label="HP: full" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100">
+    <div class="hud__fill hud__fill--hp"></div>
+  </div>
+
+  <span class="hud__label hud__label--xp">XP</span>
+  <div class="hud__bar hud__bar--xp" role="meter" aria-label="XP" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100">
+    <div class="hud__fill hud__fill--xp"></div>
+  </div>
+
+  <span class="hud__stars">★99</span>
+
+  <span class="hud__coin" aria-hidden="true"></span>
+  <span class="hud__coinx">x∞</span>
+
+  <button class="hud__mute" id="mute-toggle" aria-label="Toggle audio (currently muted)" aria-pressed="true">
+    🔇
+  </button>
+</div>
+
+<style>
+  .hud {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: var(--fs-hud);
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+
+  .hud__1up   { color: var(--c-green); }
+  .hud__stars { color: var(--c-yellow); }
+  .hud__coinx { color: var(--c-ink); font-size: 8px; }
+
+  .hud__label { font-size: 8px; }
+  .hud__label--hp { color: var(--c-red); }
+  .hud__label--xp { color: var(--c-cyan); }
+
+  /* HP bar */
+  .hud__bar {
+    height: 12px;
+    background: #231a44;
+    box-shadow: 0 0 0 2px var(--c-faint);
+    flex-shrink: 0;
+  }
+  .hud__bar--hp { width: 120px; }
+  .hud__bar--xp { flex: 1; min-width: 60px; }
+
+  .hud__fill {
+    height: 100%;
+  }
+
+  .hud__fill--hp {
+    width: 92%;
+    background: repeating-linear-gradient(90deg, var(--c-red) 0 8px, #d83b54 8px 12px);
+    background-size: 12px 100%;
+  }
+
+  .hud__fill--xp {
+    width: 78%;
+    background: repeating-linear-gradient(90deg, var(--c-cyan) 0 8px, #2bb8b2 8px 12px);
+    background-size: 12px 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hud__fill--hp { animation: barber 0.6s linear infinite; }
+    .hud__fill--xp { animation: barber 0.6s linear infinite; }
+  }
+
+  .hud__coin {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--c-yellow);
+    box-shadow: inset -2px -2px 0 var(--c-orange);
+  }
+
+  .hud__mute {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+    color: var(--c-ink);
+    line-height: 1;
+  }
+
+  @media (max-width: 680px) {
+    .hud__stars,
+    .hud__coin,
+    .hud__coinx { display: none; }
+  }
+</style>

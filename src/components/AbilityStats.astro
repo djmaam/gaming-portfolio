@@ -1,0 +1,73 @@
+---
+import PixelPanel from './PixelPanel.astro';
+import { portfolio } from '../data/portfolio';
+
+const CELL_COLORS = ['var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-yellow)', 'var(--c-yellow)', 'var(--c-red)', 'var(--c-red)'];
+---
+
+<PixelPanel accent="red" label="ABILITY STATS" class="ability-stats">
+  <div class="stats-list">
+    {portfolio.stats.map(stat => {
+      const filled = Math.round(stat.lvl / 10);
+      const lv = Math.round(stat.lvl / 5);
+      return (
+        <div class="stat-row">
+          <div class="stat-row__header">
+            <span class="stat-row__label">{stat.label}</span>
+            <span class="stat-row__lv">LV{lv}</span>
+          </div>
+          <div class="stat-row__bar" role="meter" aria-label={`${stat.label} level ${lv}`} aria-valuenow={stat.lvl} aria-valuemin={0} aria-valuemax={100}>
+            {Array.from({ length: 10 }, (_, i) => (
+              <div
+                class:list={['stat-cell', i < filled && 'stat-cell--filled']}
+                style={i < filled ? `background:${CELL_COLORS[i]}` : ''}
+              />
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</PixelPanel>
+
+<style>
+  .stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+
+  .stat-row__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+
+  .stat-row__label {
+    font-family: 'Silkscreen', monospace;
+    font-size: 14px;
+    color: var(--c-ink);
+  }
+
+  .stat-row__lv {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--c-yellow);
+  }
+
+  .stat-row__bar {
+    display: flex;
+    gap: 3px;
+  }
+
+  .stat-cell {
+    flex: 1;
+    height: 14px;
+    background: #241b46;
+  }
+
+  .stat-cell--filled {
+    box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.3);
+  }
+</style>

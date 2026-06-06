@@ -1,0 +1,158 @@
+---
+import PixelPanel from './PixelPanel.astro';
+import { portfolio } from '../data/portfolio';
+---
+
+<PixelPanel accent="yellow" label="WORLD MAP · CAREER STAGES" class="world-map">
+  <div class="wm-timeline" id="world-map-timeline">
+    {portfolio.experience.map((job, i) => {
+      const nodeNum = portfolio.experience.length - i;
+      const isCurrent = i === 0;
+      return (
+        <div class="wm-row">
+          <!-- Left rail -->
+          <div class="wm-rail">
+            <button
+              class:list={['wm-node', isCurrent && 'wm-node--current']}
+              aria-label={`Career stage ${nodeNum} — ${job.company}, ${job.role}${isCurrent ? ', currently playing' : ''}`}
+              data-job-index={i}
+            >
+              {nodeNum}
+            </button>
+            {i < portfolio.experience.length - 1 && (
+              <div class="wm-connector" aria-hidden="true"></div>
+            )}
+          </div>
+
+          <!-- Job card -->
+          <div class="wm-card">
+            <div class="wm-card__header">
+              <span class="wm-card__company">{job.company}</span>
+              {isCurrent
+                ? <span class="wm-card__status wm-card__status--now">▶ NOW PLAYING</span>
+                : <span class="wm-card__status wm-card__status--cleared">✓ CLEARED · {job.year}</span>
+              }
+            </div>
+            <p class="wm-card__role">{job.role}</p>
+            <p class="wm-card__tech">{job.tech}</p>
+            <p class="wm-card__note">{job.note}</p>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</PixelPanel>
+
+<style>
+  .wm-timeline {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .wm-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  /* Left rail */
+  .wm-rail {
+    width: 54px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .wm-node {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    background: var(--c-panelHi);
+    color: var(--c-dim);
+    border: none;
+    box-shadow: 0 0 0 3px var(--c-bg0), 0 0 0 5px var(--c-faint);
+    flex-shrink: 0;
+  }
+
+  .wm-node--current {
+    background: var(--c-green);
+    color: var(--c-bg0);
+    box-shadow: 0 0 0 3px var(--c-bg0), 0 0 0 5px var(--c-green);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .wm-node--current {
+      animation: pulseGlow 1.8s ease-in-out infinite;
+    }
+  }
+
+  .wm-connector {
+    width: 4px;
+    flex: 1;
+    min-height: 24px;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--c-faint) 0 5px,
+      transparent 5px 10px
+    );
+    margin: 4px 0;
+  }
+
+  /* Job card */
+  .wm-card {
+    flex: 1;
+    padding: 6px 0 20px;
+  }
+
+  .wm-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .wm-card__company {
+    font-family: 'Press Start 2P', monospace;
+    font-size: var(--fs-company);
+    color: var(--c-ink);
+    line-height: 1.4;
+  }
+
+  .wm-card__status {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    flex-shrink: 0;
+  }
+
+  .wm-card__status--now     { color: var(--c-green); }
+  .wm-card__status--cleared { color: var(--c-yellow); }
+
+  .wm-card__role {
+    font-family: 'Silkscreen', monospace;
+    font-size: var(--fs-role);
+    color: var(--c-cyan);
+    margin-bottom: 4px;
+  }
+
+  .wm-card__tech {
+    font-family: 'Silkscreen', monospace;
+    font-size: var(--fs-tech);
+    color: var(--c-dim);
+    margin-bottom: 3px;
+  }
+
+  .wm-card__note {
+    font-family: 'Silkscreen', monospace;
+    font-size: var(--fs-tech);
+    color: var(--c-faint);
+  }
+</style>

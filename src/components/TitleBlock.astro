@@ -1,0 +1,64 @@
+---
+// Panel B — Title Block
+---
+
+<div class="title-block">
+  <div class="title-block__stars" aria-hidden="true">★ ★ ★</div>
+
+  <h1 class="title-block__logo">
+    MARCOS<br />ARRIETA
+  </h1>
+
+  <p class="title-block__subtitle">SOFTWARE ENGINEER &amp; AI ORCHESTRATOR</p>
+
+  <p class="title-block__press" id="press-start" aria-label="Press Start to enter interactive mode">
+    ▶ PRESS START ◀
+  </p>
+</div>
+
+<style>
+  .title-block {
+    text-align: center;
+    margin-bottom: 26px;
+  }
+
+  .title-block__stars {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--c-cyan);
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+  }
+
+  .title-block__logo {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(28px, 4vw, var(--fs-logo));
+    line-height: 1.15;
+    letter-spacing: 2px;
+    color: var(--c-ink);
+    text-shadow: 4px 4px 0 var(--c-purple), 8px 8px 0 var(--c-bg0);
+    margin-top: 0;
+  }
+
+  .title-block__subtitle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: var(--c-green);
+    margin-top: 18px;
+    line-height: 1.6;
+  }
+
+  .title-block__press {
+    font-family: 'Press Start 2P', monospace;
+    font-size: var(--fs-press);
+    color: var(--c-yellow);
+    margin-top: 14px;
+    cursor: pointer;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .title-block__press {
+      animation: blink 1.1s steps(1) infinite;
+    }
+  }
+</style>

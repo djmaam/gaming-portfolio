@@ -1,0 +1,18 @@
+---
+export interface Props {
+  accent: 'green' | 'red' | 'blue' | 'purple' | 'yellow' | 'cyan' | 'pink';
+  label?: string;
+  class?: string;
+}
+
+const { accent, label, class: className } = Astro.props;
+---
+
+<div class:list={['pixel-panel', `pixel-panel--${accent}`, className]}>
+  {label && (
+    <div class:list={['panel-label', `panel-label--${accent}`]}>
+      {label}
+    </div>
+  )}
+  <slot />
+</div>

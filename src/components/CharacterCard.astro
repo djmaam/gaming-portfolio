@@ -1,0 +1,59 @@
+---
+import PixelPanel from './PixelPanel.astro';
+import HeroSprite from './HeroSprite.astro';
+---
+
+<PixelPanel accent="green" label="PLAYER 1" class="char-card">
+  <div class="char-card__inner">
+    <div class="char-card__sprite-wrap">
+      <HeroSprite cellSize={12} float={true} />
+      <div class="char-card__shadow" aria-hidden="true"></div>
+    </div>
+    <p class="char-card__handle">@djmaam</p>
+    <p class="char-card__class">CLASS · FULL-STACK MAGE</p>
+    <p class="char-card__home">HOME · ARGENTINA</p>
+  </div>
+</PixelPanel>
+
+<style>
+  .char-card__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .char-card__sprite-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .char-card__shadow {
+    width: 120px;
+    height: 12px;
+    margin-top: -4px;
+    background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(0,0,0,0.5) 0%, transparent 70%);
+  }
+
+  .char-card__handle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--c-ink);
+  }
+
+  .char-card__class {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: var(--c-yellow);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .char-card__home {
+    font-family: 'Silkscreen', monospace;
+    font-size: 14px;
+    color: var(--c-dim);
+  }
+</style>

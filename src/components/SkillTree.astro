@@ -1,0 +1,92 @@
+---
+import PixelPanel from './PixelPanel.astro';
+import { portfolio } from '../data/portfolio';
+
+const RARITY = [
+  { tag: 'LEGENDARY', color: 'var(--c-yellow)' },
+  { tag: 'EPIC',      color: 'var(--c-purple)' },
+  { tag: 'EPIC',      color: 'var(--c-purple)' },
+  { tag: 'RARE',      color: 'var(--c-cyan)'   },
+  { tag: 'RARE',      color: 'var(--c-cyan)'   },
+  { tag: 'COMMON',    color: 'var(--c-green)'  },
+];
+---
+
+<PixelPanel accent="purple" label="SKILL TREE · INVENTORY" class="skill-tree">
+  <div class="skill-tree__grid">
+    {portfolio.skills.map((group, i) => {
+      const r = RARITY[i];
+      return (
+        <div class="skill-card raised-cell" style={`box-shadow:0 0 0 2px ${r.color},inset -2px -2px 0 rgba(0,0,0,.3)`}>
+          <div class="skill-card__header">
+            <span class="skill-card__group" style={`color:${r.color}`}>◆ {group.group}</span>
+            <span class="skill-card__tag" style={`color:${r.color}`}>{r.tag}</span>
+          </div>
+          <div class="skill-card__items">
+            {group.items.map(item => (
+              <span class="skill-chip">{item}</span>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</PixelPanel>
+
+<style>
+  .skill-tree__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .skill-card {
+    background: var(--c-panelHi);
+    padding: 10px;
+    transition: transform 0.1s;
+  }
+
+  .skill-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .skill-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 4px;
+  }
+
+  .skill-card__group {
+    font-family: 'Silkscreen', monospace;
+    font-size: 14px;
+  }
+
+  .skill-card__tag {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6px;
+    flex-shrink: 0;
+  }
+
+  .skill-card__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .skill-chip {
+    font-family: 'Silkscreen', monospace;
+    font-size: var(--fs-chip);
+    color: var(--c-ink);
+    background: #0f0a26;
+    padding: 2px 6px;
+    box-shadow: 0 0 0 1px var(--c-faint);
+  }
+
+  @media (max-width: 680px) {
+    .skill-tree__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

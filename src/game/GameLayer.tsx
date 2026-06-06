@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useGameState } from './useGameState';
-import { mount as mountCursor, unmount as unmountCursor } from './menuCursor';
+import { mount as mountCursor } from './menuCursor';
 import './GameLayer.css';
 
 const BOOT_MS = 1200;
@@ -55,10 +55,7 @@ export default function GameLayer() {
   const onTitle = useCallback(() => advance('EXPLORE'), [advance]);
 
   useEffect(() => {
-    if (state === 'EXPLORE') {
-      mountCursor();
-      return unmountCursor;
-    }
+    if (state === 'EXPLORE') return mountCursor();
   }, [state]);
 
   if (state === 'EXPLORE') return null;

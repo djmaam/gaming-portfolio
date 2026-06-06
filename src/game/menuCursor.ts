@@ -1,14 +1,10 @@
-let cleanupFn: (() => void) | null = null;
-
-export function mount(): void {
-  if (cleanupFn) return;
-
+export function mount(): () => void {
   const list = document.getElementById('start-menu-list');
-  if (!list) return;
+  if (!list) return () => {};
 
   const rows = Array.from(list.querySelectorAll<HTMLElement>('.menu-row'));
 
-  // Keep .menu-row--selected in sync when Tab focus moves into the menu
+  // Syncs with StartMenu.astro's select() which calls .focus() after each ArrowKey move
   const onFocusin = (e: FocusEvent) => {
     const row = (e.target as HTMLElement).closest<HTMLElement>('.menu-row');
     if (!row) return;
@@ -17,26 +13,19 @@ export function mount(): void {
   };
   list.addEventListener('focusin', onFocusin);
 
-  // Z = game-select key; activates the currently highlighted menu row
-  // Enter/Space already work natively on focused <a>/<button> — only Z needs handling
+  // Z = game-select key; Enter/Space already work natively on focused <a>/<button>
   const onKey = (e: KeyboardEvent) => {
     if (e.key !== 'z' && e.key !== 'Z') return;
-    if (!list.contains(document.activeElement)) return;
     const target = document.activeElement as HTMLElement;
+    if (!list.contains(target)) return;
     if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
     e.preventDefault();
-    const active = list.querySelector<HTMLElement>('.menu-row--selected a, .menu-row--selected button');
-    active?.click();
+    list.querySelector<HTMLElement>('.menu-row--selected a, .menu-row--selected button')?.click();
   };
   window.addEventListener('keydown', onKey);
 
-  cleanupFn = () => {
+  return () => {
     list.removeEventListener('focusin', onFocusin);
     window.removeEventListener('keydown', onKey);
-    cleanupFn = null;
   };
-}
-
-export function unmount(): void {
-  cleanupFn?.();
 }

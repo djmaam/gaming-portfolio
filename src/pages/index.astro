@@ -8,9 +8,11 @@ import QuestLog from '../components/QuestLog.astro';
 import SkillTree from '../components/SkillTree.astro';
 import WorldMap from '../components/WorldMap.astro';
 import StartMenu from '../components/StartMenu.astro';
+import GameLayer from '../game/GameLayer';
 ---
 
 <Base>
+  <GameLayer client:idle />
   <HudBar />
   <TitleBlock />
 

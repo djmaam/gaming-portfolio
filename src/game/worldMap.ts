@@ -169,7 +169,7 @@ export function mount(): () => void {
 
   const prompt = document.createElement('div');
   prompt.className = 'wm-enter-prompt';
-  prompt.textContent = '▲ ENTER';
+  prompt.textContent = '▼ PRESS Z';
   prompt.hidden = true;
 
   const layer = document.createElement('div');
@@ -290,10 +290,16 @@ export function mount(): () => void {
         if (i !== 0) btn.classList.toggle('wm-node--active', i === newActive);
       });
       activeNode = newActive;
+      if (activeNode !== -1) {
+        // Live rect read — survives layout shifts from card reveals
+        const nodeRect = nodeButtons[activeNode].getBoundingClientRect();
+        const tlRect   = timeline.getBoundingClientRect();
+        // Place prompt above the node so arrow points down at the LVL circle
+        prompt.style.top = `${nodeRect.top - tlRect.top - 14}px`;
+      }
     }
 
     prompt.hidden = activeNode === -1;
-    if (activeNode !== -1) prompt.style.top = `${nodeYs[activeNode] + 22}px`;
   }
 
   return () => {

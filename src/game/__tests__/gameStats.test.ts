@@ -45,6 +45,12 @@ describe('gameStats — computeLevel', () => {
   it('caps at 99', () => {
     expect(computeLevel(9999, 9999)).toBe(99);
   });
+  it('returns 1 when nodes or skills are NaN/Infinity', () => {
+    expect(computeLevel(NaN, 0)).toBe(1);
+    expect(computeLevel(0, NaN)).toBe(1);
+    expect(computeLevel(Infinity, 0)).toBe(1);
+    expect(computeLevel(0, -Infinity)).toBe(1);
+  });
   it('boundary at threshold (level increments where floor changes)', () => {
     expect(computeLevel(1, 0)).toBe(1);
     expect(computeLevel(2, 0)).toBe(1);
@@ -124,6 +130,15 @@ describe('gameStats — mount() event wiring', () => {
     c();
     dispatchStatUpdate({ nodes: 4, skills: 10 });
     expect(hud.nodes.textContent).toBe(`0/${NODES_TOTAL}`);
+  });
+
+  it('rejects NaN / negative / non-finite stat values', () => {
+    const hud = buildHud();
+    cleanup = mount();
+    dispatchStatUpdate({ nodes: NaN, skills: -3 });
+    expect(hud.nodes.textContent).toBe(`0/${NODES_TOTAL}`);
+    expect(hud.skills.textContent).toBe(`0/${SKILLS_TOTAL}`);
+    expect(hud.level.textContent).toBe('LV.1');
   });
 
   it('flashes level element when level increments (motion enabled)', () => {

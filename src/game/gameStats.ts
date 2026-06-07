@@ -1,9 +1,9 @@
 import { portfolio } from '../data/portfolio';
 
-const VISITED_KEY    = 'gp-visited-nodes';
-const COLLECTED_KEY  = 'gp-collected-skills';
-const STAT_EVENT     = 'gp:stat-update';
-const LEVEL_CAP      = 99;
+export const VISITED_KEY    = 'gp-visited-nodes';
+export const COLLECTED_KEY  = 'gp-collected-skills';
+export const STAT_EVENT     = 'gp:stat-update';
+const LEVEL_CAP             = 99;
 
 export const NODES_TOTAL  = portfolio.experience.length;
 export const SKILLS_TOTAL = portfolio.skills.reduce((sum, g) => sum + g.items.length, 0);
@@ -14,6 +14,7 @@ export interface StatUpdateDetail {
 }
 
 export function computeLevel(nodes: number, skills: number): number {
+  if (!Number.isFinite(nodes) || !Number.isFinite(skills)) return 1;
   const raw = Math.floor((nodes * 3 + skills * 0.5) / 5);
   return Math.min(LEVEL_CAP, Math.max(1, raw));
 }
@@ -33,14 +34,23 @@ export function readNodesCount():  number { return readCount(VISITED_KEY); }
 export function readSkillsCount(): number { return readCount(COLLECTED_KEY); }
 
 export function dispatchStatUpdate(detail: StatUpdateDetail): void {
+  if (typeof window === 'undefined') return;
   window.dispatchEvent(new CustomEvent<StatUpdateDetail>(STAT_EVENT, { detail }));
 }
+
+const isValidStat = (v: unknown): v is number =>
+  typeof v === 'number' && Number.isFinite(v) && v >= 0;
 
 export function mount(): () => void {
   const nodesEl  = document.getElementById('hud-nodes');
   const skillsEl = document.getElementById('hud-skills');
   const levelEl  = document.getElementById('hud-level');
-  if (!nodesEl || !skillsEl || !levelEl) return () => {};
+  if (!nodesEl || !skillsEl || !levelEl) {
+    if (typeof console !== 'undefined') {
+      console.warn('[gameStats] HUD elements missing — stat listener not attached');
+    }
+    return () => {};
+  }
 
   let nodes  = readNodesCount();
   let skills = readSkillsCount();
@@ -54,17 +64,19 @@ export function mount(): () => void {
   render();
 
   const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const onAnimEnd = () => levelEl.classList.remove('hud__level--flash');
+  levelEl.addEventListener('animationend', onAnimEnd);
+
   const flashLevelUp = () => {
     if (isReduced) return;
-    levelEl.classList.remove('hud__level--flash');
-    void levelEl.offsetWidth;
+    if (levelEl.classList.contains('hud__level--flash')) return;
     levelEl.classList.add('hud__level--flash');
   };
 
   const onStat = (e: Event) => {
     const detail = (e as CustomEvent<StatUpdateDetail>).detail ?? {};
-    if (typeof detail.nodes  === 'number') nodes  = detail.nodes;
-    if (typeof detail.skills === 'number') skills = detail.skills;
+    if (isValidStat(detail.nodes))  nodes  = detail.nodes;
+    if (isValidStat(detail.skills)) skills = detail.skills;
     const next = computeLevel(nodes, skills);
     const leveledUp = next > level;
     level = next;
@@ -73,5 +85,8 @@ export function mount(): () => void {
   };
 
   window.addEventListener(STAT_EVENT, onStat);
-  return () => window.removeEventListener(STAT_EVENT, onStat);
+  return () => {
+    window.removeEventListener(STAT_EVENT, onStat);
+    levelEl.removeEventListener('animationend', onAnimEnd);
+  };
 }

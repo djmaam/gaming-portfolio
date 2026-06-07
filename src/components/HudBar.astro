@@ -1,7 +1,5 @@
 ---
-import { portfolio } from '../data/portfolio';
-const nodesTotal  = portfolio.experience.length;
-const skillsTotal = portfolio.skills.reduce((sum, g) => sum + g.items.length, 0);
+import { NODES_TOTAL, SKILLS_TOTAL } from '../game/gameStats';
 ---
 
 <div class="hud">
@@ -17,15 +15,17 @@ const skillsTotal = portfolio.skills.reduce((sum, g) => sum + g.items.length, 0)
     <div class="hud__fill hud__fill--xp"></div>
   </div>
 
-  <span class="hud__stat hud__stat--nodes">
-    <span class="hud__stat-label">NODES</span>
-    <span class="hud__stat-value" id="hud-nodes" aria-live="polite">0/{nodesTotal}</span>
+  <span class="hud__live" aria-live="polite" aria-atomic="true">
+    <span class="hud__stat hud__stat--nodes">
+      <span class="hud__stat-label">NODES</span>
+      <span class="hud__stat-value" id="hud-nodes">0/{NODES_TOTAL}</span>
+    </span>
+    <span class="hud__stat hud__stat--skills">
+      <span class="hud__stat-label">SKILLS</span>
+      <span class="hud__stat-value" id="hud-skills">0/{SKILLS_TOTAL}</span>
+    </span>
+    <span class="hud__level" id="hud-level">LV.1</span>
   </span>
-  <span class="hud__stat hud__stat--skills">
-    <span class="hud__stat-label">SKILLS</span>
-    <span class="hud__stat-value" id="hud-skills" aria-live="polite">0/{skillsTotal}</span>
-  </span>
-  <span class="hud__level" id="hud-level" aria-live="polite">LV.1</span>
 
   <span class="hud__coin" aria-hidden="true"></span>
   <span class="hud__coinx">x∞</span>
@@ -35,22 +35,28 @@ const skillsTotal = portfolio.skills.reduce((sum, g) => sum + g.items.length, 0)
   </button>
 </div>
 
-<script define:vars={{ nodesTotal, skillsTotal }}>
-  // Pre-hydration seed: avoid flash of "0/N" when sessionStorage already has progress.
-  const readLen = (key) => {
-    try {
-      const raw = sessionStorage.getItem(key);
-      if (!raw) return 0;
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed.length : 0;
-    } catch { return 0; }
+<script>
+  // Pre-hydration seed: runs once before GameLayer's client:idle hydration to
+  // avoid a flash of "0/N" when sessionStorage already has progress.
+  // Single source of truth: imports from gameStats. If hydration strategy
+  // changes from client:idle to client:load, audit execution order.
+  import {
+    NODES_TOTAL,
+    SKILLS_TOTAL,
+    computeLevel,
+    readNodesCount,
+    readSkillsCount,
+  } from '../game/gameStats';
+
+  const n = readNodesCount();
+  const s = readSkillsCount();
+  const lv = computeLevel(n, s);
+  const set = (id: string, txt: string) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = txt;
   };
-  const n = readLen('gp-visited-nodes');
-  const s = readLen('gp-collected-skills');
-  const lv = Math.min(99, Math.max(1, Math.floor((n * 3 + s * 0.5) / 5)));
-  const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
-  set('hud-nodes',  `${n}/${nodesTotal}`);
-  set('hud-skills', `${s}/${skillsTotal}`);
+  set('hud-nodes',  `${n}/${NODES_TOTAL}`);
+  set('hud-skills', `${s}/${SKILLS_TOTAL}`);
   set('hud-level',  `LV.${lv}`);
 </script>
 
@@ -68,6 +74,7 @@ const skillsTotal = portfolio.skills.reduce((sum, g) => sum + g.items.length, 0)
   .hud__1up   { color: var(--c-green); }
   .hud__coinx { color: var(--c-ink); font-size: 8px; }
 
+  .hud__live        { display: inline-flex; align-items: center; gap: 14px; }
   .hud__stat        { display: inline-flex; align-items: center; gap: 4px; }
   .hud__stat-label  { font-size: 8px; }
   .hud__stat--nodes  .hud__stat-label { color: var(--c-green); }

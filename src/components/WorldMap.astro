@@ -22,7 +22,7 @@ import { portfolio, type Experience } from '../data/portfolio';
             )}
           </div>
 
-          <div class="wm-card">
+          <div class="wm-card" data-job-index={i}>
             <div class="wm-card__header">
               <span class="wm-card__company">{job.company}</span>
               <span class:list={['wm-card__status', isNow ? 'wm-card__status--now' : 'wm-card__status--cleared']}>
@@ -30,17 +30,26 @@ import { portfolio, type Experience } from '../data/portfolio';
               </span>
             </div>
             <p class="wm-card__lvl">[LVL {job.lvl}]</p>
-            <p class="wm-card__role">{job.role}</p>
-            <p class="wm-card__tech">{job.tech}</p>
-            {job.bullets.length > 0 && (
-              <ul class="wm-card__bullets">
-                {job.bullets.map((b: string) => (
-                  <li class="wm-card__bullet">{b}</li>
-                ))}
-              </ul>
-            )}
-            {job.bullets.length === 0 && (
-              <p class="wm-card__note">{job.note}</p>
+            <div class="wm-card__content">
+              <p class="wm-card__role">{job.role}</p>
+              <p class="wm-card__tech">{job.tech}</p>
+              {job.bullets.length > 0 && (
+                <ul class="wm-card__bullets">
+                  {job.bullets.map((b: string) => (
+                    <li class="wm-card__bullet">{b}</li>
+                  ))}
+                </ul>
+              )}
+              {job.bullets.length === 0 && (
+                <p class="wm-card__note">{job.note}</p>
+              )}
+            </div>
+            {!isNow && (
+              <div class="wm-card__cipher">
+                <p class="wm-card__enc">ROLE:&nbsp; ??? ENCRYPTED</p>
+                <p class="wm-card__enc">GEAR:&nbsp; ??? ENCRYPTED</p>
+                <p class="wm-card__enc">QUEST: ??? ENCRYPTED</p>
+              </div>
             )}
           </div>
         </div>

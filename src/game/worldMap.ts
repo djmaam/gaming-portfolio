@@ -12,6 +12,27 @@ export function mount(): () => void {
   const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const jobs      = portfolio.experience;
 
+  // ── Progressive disclosure ───────────────────────────────────────────────────
+  const visitedRaw = sessionStorage.getItem('gp-visited-nodes');
+  const visited = new Set<number>(visitedRaw ? (JSON.parse(visitedRaw) as number[]) : []);
+
+  const cardEls = Array.from(document.querySelectorAll<HTMLElement>('.wm-card[data-job-index]'));
+  cardEls.forEach(card => {
+    const idx = parseInt(card.getAttribute('data-job-index')!, 10);
+    if (idx !== 0 && !visited.has(idx)) card.classList.add('wm-card--hidden');
+  });
+
+  function markVisited(index: number) {
+    if (index === 0) return;
+    visited.add(index);
+    sessionStorage.setItem('gp-visited-nodes', JSON.stringify([...visited]));
+    const card = document.querySelector<HTMLElement>(`.wm-card[data-job-index="${index}"]`);
+    if (card) {
+      card.classList.remove('wm-card--hidden');
+      card.classList.add('wm-card--revealed');
+    }
+  }
+
   // ── Dialog state (local to this mount call) ─────────────────────────────────
   let dialogOpen = false;
   let dialogEl: HTMLElement | null = null;
@@ -101,6 +122,7 @@ export function mount(): () => void {
     if (dialogOpen) return;
     currentJob = index;
     dialogOpen = true;
+    markVisited(index);
     renderDialog();
   }
 

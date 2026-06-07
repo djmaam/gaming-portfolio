@@ -1,3 +1,36 @@
+/* Progressive disclosure */
+.wm-card__cipher {
+  display: none;
+}
+
+.wm-card--hidden .wm-card__content {
+  display: none;
+}
+
+.wm-card--hidden .wm-card__cipher {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wm-card__enc {
+  font-family: 'Silkscreen', monospace;
+  font-size: var(--fs-tech);
+  color: var(--c-faint);
+  letter-spacing: 1px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wm-card--revealed {
+    animation: wm-card-reveal 0.5s steps(4) forwards;
+  }
+
+  @keyframes wm-card-reveal {
+    0%   { clip-path: inset(0 0 100% 0); }
+    100% { clip-path: inset(0 0 0% 0); }
+  }
+}
+
 /* Hero layer */
 .wm-hero-layer {
   position: absolute;

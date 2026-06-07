@@ -1,5 +1,7 @@
 ---
-// Panel A — HUD Bar
+import { portfolio } from '../data/portfolio';
+const nodesTotal  = portfolio.experience.length;
+const skillsTotal = portfolio.skills.reduce((sum, g) => sum + g.items.length, 0);
 ---
 
 <div class="hud">
@@ -15,7 +17,15 @@
     <div class="hud__fill hud__fill--xp"></div>
   </div>
 
-  <span class="hud__stars">★99</span>
+  <span class="hud__stat hud__stat--nodes">
+    <span class="hud__stat-label">NODES</span>
+    <span class="hud__stat-value" id="hud-nodes" aria-live="polite">0/{nodesTotal}</span>
+  </span>
+  <span class="hud__stat hud__stat--skills">
+    <span class="hud__stat-label">SKILLS</span>
+    <span class="hud__stat-value" id="hud-skills" aria-live="polite">0/{skillsTotal}</span>
+  </span>
+  <span class="hud__level" id="hud-level" aria-live="polite">LV.1</span>
 
   <span class="hud__coin" aria-hidden="true"></span>
   <span class="hud__coinx">x∞</span>
@@ -24,6 +34,25 @@
     🔇
   </button>
 </div>
+
+<script define:vars={{ nodesTotal, skillsTotal }}>
+  // Pre-hydration seed: avoid flash of "0/N" when sessionStorage already has progress.
+  const readLen = (key) => {
+    try {
+      const raw = sessionStorage.getItem(key);
+      if (!raw) return 0;
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.length : 0;
+    } catch { return 0; }
+  };
+  const n = readLen('gp-visited-nodes');
+  const s = readLen('gp-collected-skills');
+  const lv = Math.min(99, Math.max(1, Math.floor((n * 3 + s * 0.5) / 5)));
+  const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  set('hud-nodes',  `${n}/${nodesTotal}`);
+  set('hud-skills', `${s}/${skillsTotal}`);
+  set('hud-level',  `LV.${lv}`);
+</script>
 
 <style>
   .hud {
@@ -37,8 +66,23 @@
   }
 
   .hud__1up   { color: var(--c-green); }
-  .hud__stars { color: var(--c-yellow); }
   .hud__coinx { color: var(--c-ink); font-size: 8px; }
+
+  .hud__stat        { display: inline-flex; align-items: center; gap: 4px; }
+  .hud__stat-label  { font-size: 8px; }
+  .hud__stat--nodes  .hud__stat-label { color: var(--c-green); }
+  .hud__stat--skills .hud__stat-label { color: var(--c-cyan); }
+  .hud__stat-value  { font-size: var(--fs-hud); color: var(--c-ink); }
+
+  .hud__level { color: var(--c-yellow); font-size: var(--fs-hud); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hud__level--flash { animation: hud-level-flash 0.45s steps(1, end) 3; }
+  }
+  @keyframes hud-level-flash {
+    0%, 49%   { color: var(--c-yellow); }
+    50%, 100% { color: #fff; }
+  }
 
   .hud__label { font-size: 8px; }
   .hud__label--hp { color: var(--c-red); }
@@ -96,8 +140,8 @@
   }
 
   @media (max-width: 680px) {
-    .hud__stars,
     .hud__coin,
     .hud__coinx { display: none; }
+    .hud__stat-label { display: none; }
   }
 </style>

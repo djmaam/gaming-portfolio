@@ -1,4 +1,5 @@
 import { portfolio, SP, cmap } from '../data/portfolio';
+import { dispatchStatUpdate } from './gameStats';
 import './worldMap.css';
 
 const SPEED = 120; // px/s
@@ -42,6 +43,7 @@ export function mount(): () => void {
       card.classList.remove('wm-card--hidden');
       card.classList.add('wm-card--revealed');
     }
+    dispatchStatUpdate({ nodes: visited.size });
   }
 
   // ── Dialog state (local to this mount call) ─────────────────────────────────

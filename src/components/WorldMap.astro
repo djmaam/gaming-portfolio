@@ -25,12 +25,15 @@ import { portfolio, type Experience } from '../data/portfolio';
           <div class="wm-card" data-job-index={i}>
             <div class="wm-card__header">
               <span class="wm-card__company">{job.company}</span>
-              <span class:list={['wm-card__status', isNow ? 'wm-card__status--now' : 'wm-card__status--cleared']}>
+              <span class:list={['wm-card__status', 'wm-card__status--real', isNow ? 'wm-card__status--now' : 'wm-card__status--cleared']}>
                 {isNow ? '▶' : '✓'} {job.status}
               </span>
+              {!isNow && (
+                <span class="wm-card__status wm-card__status--cipher">✓ CLEARED · ????</span>
+              )}
             </div>
-            <p class="wm-card__lvl">[LVL {job.lvl}]</p>
             <div class="wm-card__content">
+              <p class="wm-card__lvl">[LVL {job.lvl}]</p>
               <p class="wm-card__role">{job.role}</p>
               <p class="wm-card__tech">{job.tech}</p>
               {job.bullets.length > 0 && (

@@ -13,20 +13,31 @@ export function mount(): () => void {
   const jobs      = portfolio.experience;
 
   // ── Progressive disclosure ───────────────────────────────────────────────────
-  const visitedRaw = sessionStorage.getItem('gp-visited-nodes');
-  const visited = new Set<number>(visitedRaw ? (JSON.parse(visitedRaw) as number[]) : []);
+  const VISITED_KEY = 'gp-visited-nodes';
+  const visited = new Set<number>();
+  try {
+    const raw = sessionStorage.getItem(VISITED_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) parsed.forEach(n => typeof n === 'number' && visited.add(n));
+    }
+  } catch { /* malformed JSON or storage blocked — start with empty set */ }
 
-  const cardEls = Array.from(document.querySelectorAll<HTMLElement>('.wm-card[data-job-index]'));
-  cardEls.forEach(card => {
-    const idx = parseInt(card.getAttribute('data-job-index')!, 10);
+  const cardByIndex = new Map<number, HTMLElement>();
+  Array.from(document.querySelectorAll<HTMLElement>('.wm-card[data-job-index]')).forEach(card => {
+    const idx = parseInt(card.getAttribute('data-job-index') ?? '', 10);
+    if (Number.isNaN(idx)) return;
+    cardByIndex.set(idx, card);
     if (idx !== 0 && !visited.has(idx)) card.classList.add('wm-card--hidden');
   });
 
   function markVisited(index: number) {
-    if (index === 0) return;
+    if (index === 0 || visited.has(index)) return;
     visited.add(index);
-    sessionStorage.setItem('gp-visited-nodes', JSON.stringify([...visited]));
-    const card = document.querySelector<HTMLElement>(`.wm-card[data-job-index="${index}"]`);
+    try {
+      sessionStorage.setItem(VISITED_KEY, JSON.stringify([...visited]));
+    } catch { /* private browsing / quota — in-memory state still correct */ }
+    const card = cardByIndex.get(index);
     if (card) {
       card.classList.remove('wm-card--hidden');
       card.classList.add('wm-card--revealed');
@@ -56,6 +67,7 @@ export function mount(): () => void {
   }
 
   function renderDialog(trigger: 'open' | 'prev' | 'next' = 'open') {
+    markVisited(currentJob);
     dialogEl?.remove();
     const job       = jobs[currentJob];
     const isCurrent = currentJob === 0;
@@ -122,7 +134,6 @@ export function mount(): () => void {
     if (dialogOpen) return;
     currentJob = index;
     dialogOpen = true;
-    markVisited(index);
     renderDialog();
   }
 

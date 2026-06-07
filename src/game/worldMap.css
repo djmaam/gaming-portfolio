@@ -1,10 +1,20 @@
 /* Progressive disclosure */
-.wm-card__cipher {
+.wm-card__cipher,
+.wm-card__status--cipher {
   display: none;
 }
 
 .wm-card--hidden .wm-card__content {
   display: none;
+}
+
+.wm-card--hidden .wm-card__status--real {
+  display: none;
+}
+
+.wm-card--hidden .wm-card__status--cipher {
+  display: inline;
+  color: var(--c-faint);
 }
 
 .wm-card--hidden .wm-card__cipher {
@@ -20,8 +30,13 @@
   letter-spacing: 1px;
 }
 
+/* Reveal final state — guarantees content visible even if animation fails */
+.wm-card--revealed .wm-card__content {
+  clip-path: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .wm-card--revealed {
+  .wm-card--revealed .wm-card__content {
     animation: wm-card-reveal 0.5s steps(4) forwards;
   }
 

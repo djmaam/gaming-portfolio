@@ -29,6 +29,26 @@ test.describe('WorldMap progressive disclosure', () => {
     }
   });
 
+  test('encrypted cards hide LVL number and show "CLEARED · ????" status', async ({ page }) => {
+    for (let i = 1; i <= 4; i++) {
+      const card = page.locator(`.wm-card[data-job-index="${i}"]`);
+      await expect(card.locator('.wm-card__lvl')).not.toBeVisible();
+      await expect(card.locator('.wm-card__status--cipher')).toBeVisible();
+      await expect(card.locator('.wm-card__status--cipher')).toContainText('CLEARED · ????');
+      await expect(card.locator('.wm-card__status--real')).not.toBeVisible();
+    }
+  });
+
+  test('ArrowRight in dialog reveals next card', async ({ page }) => {
+    await page.locator('.wm-node[data-job-index="0"]').click();
+    await expect(page.locator('.wm-dialog-panel')).toBeVisible({ timeout: 5_000 });
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Escape');
+    const card1 = page.locator('.wm-card[data-job-index="1"]');
+    await expect(card1).not.toHaveClass(/wm-card--hidden/);
+    await expect(card1.locator('.wm-card__content')).toBeVisible();
+  });
+
   test('opening dialog for node 1 reveals card 1', async ({ page }) => {
     await page.locator('.wm-node[data-job-index="1"]').click();
     await expect(page.locator('.wm-dialog-panel')).toBeVisible({ timeout: 5_000 });

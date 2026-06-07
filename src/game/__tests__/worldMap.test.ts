@@ -275,6 +275,46 @@ describe('worldMap — progressive disclosure', () => {
     expect(cards[2].classList.contains('wm-card--hidden')).toBe(false);
     expect(cards[3].classList.contains('wm-card--hidden')).toBe(true);
   });
+
+  it('ArrowRight in open dialog marks newly-shown job as visited and reveals its card', () => {
+    const { nodes, cards } = buildDOMWithCards();
+    cleanup = mount();
+    nodes[0].click(); // open dialog at job 0
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(cards[1].classList.contains('wm-card--hidden')).toBe(false);
+    expect(cards[1].classList.contains('wm-card--revealed')).toBe(true);
+    const stored = JSON.parse(sessionStorage.getItem('gp-visited-nodes') ?? '[]') as number[];
+    expect(stored).toContain(1);
+  });
+
+  it('NEXT button click in dialog marks newly-shown job as visited', () => {
+    const { nodes, cards } = buildDOMWithCards();
+    cleanup = mount();
+    nodes[0].click();
+    const nextBtn = document.querySelectorAll<HTMLButtonElement>('.wm-dialog__btn')[2];
+    nextBtn.click();
+    expect(cards[1].classList.contains('wm-card--hidden')).toBe(false);
+    const stored = JSON.parse(sessionStorage.getItem('gp-visited-nodes') ?? '[]') as number[];
+    expect(stored).toContain(1);
+  });
+
+  it('malformed sessionStorage JSON does not crash mount()', () => {
+    sessionStorage.setItem('gp-visited-nodes', '[1, 2,');
+    const { cards } = buildDOMWithCards();
+    expect(() => { cleanup = mount(); }).not.toThrow();
+    // Card 1 should default to hidden when visited set cannot be parsed
+    expect(cards[1].classList.contains('wm-card--hidden')).toBe(true);
+  });
+
+  it('markVisited does not write to sessionStorage when index already visited', () => {
+    sessionStorage.setItem('gp-visited-nodes', JSON.stringify([1]));
+    const { nodes } = buildDOMWithCards();
+    cleanup = mount();
+    const spy = vi.spyOn(Storage.prototype, 'setItem');
+    nodes[1].click(); // already visited
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
 });
 
 describe('worldMap — dialog keyboard navigation', () => {

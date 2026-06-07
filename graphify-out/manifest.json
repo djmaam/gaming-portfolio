@@ -1,0 +1,172 @@
+{
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/astro.config.mjs": {
+    "mtime": 1780737714.2123616,
+    "ast_hash": "61dccaa7ab0d7bb4d1c953b77d9010c8",
+    "semantic_hash": "61dccaa7ab0d7bb4d1c953b77d9010c8"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/design-reference/dir-nes-epic.jsx": {
+    "mtime": 1780736424.0,
+    "ast_hash": "0a17ea5ed2e0f1d5d93adfc0db09036b",
+    "semantic_hash": "0a17ea5ed2e0f1d5d93adfc0db09036b"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/design-reference/portfolio-data.jsx": {
+    "mtime": 1780736424.0,
+    "ast_hash": "3d16c1b7aefee105cf624893c011867a",
+    "semantic_hash": "3d16c1b7aefee105cf624893c011867a"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/package.json": {
+    "mtime": 1780739082.3282156,
+    "ast_hash": "030b2a2692eb8b345447f4745a063c98",
+    "semantic_hash": "030b2a2692eb8b345447f4745a063c98"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/components/AbilityStats.astro": {
+    "mtime": 1780739080.6104484,
+    "ast_hash": "868d4249849dba26764c071115ddb5ed",
+    "semantic_hash": "868d4249849dba26764c071115ddb5ed"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/components/CharacterCard.astro": {
+    "mtime": 1780739081.8981504,
+    "ast_hash": "a2ac6d1af73fba8d037d5ddcb4a9fd85",
+    "semantic_hash": "a2ac6d1af73fba8d037d5ddcb4a9fd85"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/components/HeroSprite.astro": {
+    "mtime": 1780739104.2625802,
+    "ast_hash": "6c4dbfa972fd736b3edae01c053a3a8c",
+    "semantic_hash": "6c4dbfa972fd736b3edae01c053a3a8c"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/components/HudBar.astro": {
+    "mtime": 1780737812.793515,
+    "ast_hash": "141e3b7f7f0bc6b8fbac05a0b39cd7a2",
+    "semantic_hash": "141e3b7f7f0bc6b8fbac05a0b39cd7a2"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/components/PixelPanel.astro": {
+    "mtime": 1780737795.9125278,
+    "ast_hash": "956ee164dcc94822aa24111000243875",
+    "semantic_hash": "956ee164dcc94822aa24111000243875"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/components/QuestLog.astro": {
+    "mtime": 1780737858.8198457,
+    "ast_hash": "22d23c7ec7c6023025946072d8fdc5da",
+    "semantic_hash": "22d23c7ec7c6023025946072d8fdc5da"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/components/SkillTree.astro": {
+    "mtime": 1780739098.1338851,
+    "ast_hash": "bf5f9ee97b89a190bd1f5a9f1e2b40f5",
+    "semantic_hash": "bf5f9ee97b89a190bd1f5a9f1e2b40f5"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/components/StartMenu.astro": {
+    "mtime": 1780739112.9137652,
+    "ast_hash": "33385904a23dd7ca048d10ec38c45dbe",
+    "semantic_hash": "33385904a23dd7ca048d10ec38c45dbe"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/components/TitleBlock.astro": {
+    "mtime": 1780737822.866699,
+    "ast_hash": "c9c4bd19f041b84bc5cc31ca749d06d4",
+    "semantic_hash": "c9c4bd19f041b84bc5cc31ca749d06d4"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/components/WorldMap.astro": {
+    "mtime": 1780737889.650157,
+    "ast_hash": "f2f373ec84aade9c0506710a99fd6e54",
+    "semantic_hash": "f2f373ec84aade9c0506710a99fd6e54"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/data/portfolio.ts": {
+    "mtime": 1780737769.9427567,
+    "ast_hash": "78f0252ec8817cd1ccc17e949568cf31",
+    "semantic_hash": "78f0252ec8817cd1ccc17e949568cf31"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/game/GameLayer.tsx": {
+    "mtime": 1780743175.7465613,
+    "ast_hash": "bb1061dadbb209c5e6de7bf14020c6e3",
+    "semantic_hash": "bb1061dadbb209c5e6de7bf14020c6e3"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/game/menuCursor.ts": {
+    "mtime": 1780741210.879557,
+    "ast_hash": "c5b1f49a8d636a114d187a3f3dbadf3e",
+    "semantic_hash": "c5b1f49a8d636a114d187a3f3dbadf3e"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/game/useGameState.ts": {
+    "mtime": 1780740755.6304867,
+    "ast_hash": "04e46c30162320c0d9193bcd211e67bd",
+    "semantic_hash": "04e46c30162320c0d9193bcd211e67bd"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/game/worldMap.ts": {
+    "mtime": 1780743175.7469578,
+    "ast_hash": "4381bb74e2b06dbb8049c34ac1922c87",
+    "semantic_hash": "4381bb74e2b06dbb8049c34ac1922c87"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/layouts/Base.astro": {
+    "mtime": 1780737791.727559,
+    "ast_hash": "e3f6005f57e1023466f2a4ab4fdeab84",
+    "semantic_hash": "e3f6005f57e1023466f2a4ab4fdeab84"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/src/pages/index.astro": {
+    "mtime": 1780740755.6308424,
+    "ast_hash": "59138c3be184f1655a202181587c9e8b",
+    "semantic_hash": "59138c3be184f1655a202181587c9e8b"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/tsconfig.json": {
+    "mtime": 1780737698.4245658,
+    "ast_hash": "435fd597d730817e9056f006911084dd",
+    "semantic_hash": "435fd597d730817e9056f006911084dd"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/CLAUDE.md": {
+    "mtime": 1780784527.7576234,
+    "ast_hash": "64323ce263fdb1fd4c717972e553832d",
+    "semantic_hash": "64323ce263fdb1fd4c717972e553832d"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/ARCHITECTURE.md": {
+    "mtime": 1780736424.0,
+    "ast_hash": "e6480f7796ef3e4b57473b1fbf1ba20a",
+    "semantic_hash": "e6480f7796ef3e4b57473b1fbf1ba20a"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/DESIGN_SPEC.md": {
+    "mtime": 1780736424.0,
+    "ast_hash": "745f517a144a65342717d0db1bb14b31",
+    "semantic_hash": "745f517a144a65342717d0db1bb14b31"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/GAME_SPEC.md": {
+    "mtime": 1780736424.0,
+    "ast_hash": "fba15c5169475888548e4acfcc2c8ee0",
+    "semantic_hash": "fba15c5169475888548e4acfcc2c8ee0"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/README.md": {
+    "mtime": 1780736424.0,
+    "ast_hash": "83c34f13e40a11b764f5a6d69b653933",
+    "semantic_hash": "83c34f13e40a11b764f5a6d69b653933"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/design-reference/EPIC-reference.html": {
+    "mtime": 1780736424.0,
+    "ast_hash": "2528c610828ebfeaba1c0b337b41fe10",
+    "semantic_hash": "2528c610828ebfeaba1c0b337b41fe10"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/screenshots/01-epic.png": {
+    "mtime": 1780736424.0,
+    "ast_hash": "9d1ceeac87db1e9c83f03c7acce06564",
+    "semantic_hash": "9d1ceeac87db1e9c83f03c7acce06564"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/screenshots/02-epic.png": {
+    "mtime": 1780736424.0,
+    "ast_hash": "9092108b218100ae68a8ad19d667b9eb",
+    "semantic_hash": "9092108b218100ae68a8ad19d667b9eb"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/screenshots/03-epic.png": {
+    "mtime": 1780736424.0,
+    "ast_hash": "fd1cf4ef1a0e045574cb1ec2ee366433",
+    "semantic_hash": "fd1cf4ef1a0e045574cb1ec2ee366433"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/screenshots/04-epic.png": {
+    "mtime": 1780736424.0,
+    "ast_hash": "5b7bde1264d68cce96d19371eadd5c2e",
+    "semantic_hash": "5b7bde1264d68cce96d19371eadd5c2e"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/design_handoff_8bit_epic/screenshots/05-epic.png": {
+    "mtime": 1780736424.0,
+    "ast_hash": "d6b5f632a22cf49e20783c1c19abed19",
+    "semantic_hash": "d6b5f632a22cf49e20783c1c19abed19"
+  },
+  "/Users/djmaam/Projects/Marcos/gaming-portfolio/public/favicon.svg": {
+    "mtime": 1780508116.0,
+    "ast_hash": "8c13f40658976ea1dfb8ba37a8be0e8d",
+    "semantic_hash": "8c13f40658976ea1dfb8ba37a8be0e8d"
+  }
+}

@@ -34,6 +34,12 @@ Object.defineProperty(document, 'fonts', {
   value: { ready: Promise.resolve() },
 });
 
+// document.visibilityState — worldMap.ts pauses rAF loop when 'hidden'
+Object.defineProperty(document, 'visibilityState', {
+  writable: true,
+  value: 'visible',
+});
+
 // performance.now — returns 0 at mount; loop uses the rAF `now` param, not this
 vi.spyOn(performance, 'now').mockReturnValue(0);
 
@@ -52,6 +58,7 @@ beforeEach(() => {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   }));
-  vi.mocked(window.requestAnimationFrame).mockImplementation(() => 0);
+  let _rafId = 0;
+  vi.mocked(window.requestAnimationFrame).mockImplementation(() => ++_rafId);
   vi.mocked(performance.now).mockReturnValue(0);
 });

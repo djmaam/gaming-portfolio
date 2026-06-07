@@ -1,14 +1,17 @@
 ---
+export type RevealVariant = 'slide-up' | 'slide-left' | 'slide-right' | 'scale-pop' | 'fade';
+
 export interface Props {
   accent: 'green' | 'red' | 'blue' | 'purple' | 'yellow' | 'cyan' | 'pink';
   label?: string;
   class?: string;
+  reveal?: RevealVariant;
 }
 
-const { accent, label, class: className } = Astro.props;
+const { accent, label, class: className, reveal = 'slide-up' } = Astro.props;
 ---
 
-<div class:list={['pixel-panel', `pixel-panel--${accent}`, className]}>
+<div class:list={['pixel-panel', `pixel-panel--${accent}`, className]} data-reveal={reveal}>
   {label && (
     <div class:list={['panel-label', `panel-label--${accent}`]}>
       {label}

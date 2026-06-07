@@ -3,6 +3,7 @@ import { useGameState } from './useGameState';
 import { mount as mountCursor } from './menuCursor';
 import { mount as mountWorldMap } from './worldMap';
 import { mount as mountGameStats } from './gameStats';
+import { mount as mountPanelReveal } from './panelReveal';
 import './GameLayer.css';
 
 const BOOT_MS = 1200;
@@ -61,7 +62,8 @@ export default function GameLayer() {
     const cleanupStats    = mountGameStats();
     const cleanupCursor   = mountCursor();
     const cleanupWorldMap = mountWorldMap();
-    return () => { cleanupCursor(); cleanupWorldMap(); cleanupStats(); };
+    const cleanupPanels   = mountPanelReveal();
+    return () => { cleanupCursor(); cleanupWorldMap(); cleanupStats(); cleanupPanels(); };
   }, [state]);
 
   if (state === 'EXPLORE') return null;

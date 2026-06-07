@@ -3,6 +3,10 @@ import { test, expect } from '@playwright/test';
 test.use({ colorScheme: 'dark' });
 
 test.beforeEach(async ({ page }) => {
+  // Pre-seed all nodes as visited so progressive disclosure doesn't hide content
+  await page.addInitScript(() => {
+    sessionStorage.setItem('gp-visited-nodes', JSON.stringify([1, 2, 3, 4]));
+  });
   await page.goto('/');
   await page.waitForLoadState('networkidle');
 });

@@ -12,6 +12,38 @@ export function mount(): () => void {
   const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const jobs      = portfolio.experience;
 
+  // ── Progressive disclosure ───────────────────────────────────────────────────
+  const VISITED_KEY = 'gp-visited-nodes';
+  const visited = new Set<number>();
+  try {
+    const raw = sessionStorage.getItem(VISITED_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) parsed.forEach(n => typeof n === 'number' && visited.add(n));
+    }
+  } catch { /* malformed JSON or storage blocked — start with empty set */ }
+
+  const cardByIndex = new Map<number, HTMLElement>();
+  Array.from(document.querySelectorAll<HTMLElement>('.wm-card[data-job-index]')).forEach(card => {
+    const idx = parseInt(card.getAttribute('data-job-index') ?? '', 10);
+    if (Number.isNaN(idx)) return;
+    cardByIndex.set(idx, card);
+    if (idx !== 0 && !visited.has(idx)) card.classList.add('wm-card--hidden');
+  });
+
+  function markVisited(index: number) {
+    if (index === 0 || visited.has(index)) return;
+    visited.add(index);
+    try {
+      sessionStorage.setItem(VISITED_KEY, JSON.stringify([...visited]));
+    } catch { /* private browsing / quota — in-memory state still correct */ }
+    const card = cardByIndex.get(index);
+    if (card) {
+      card.classList.remove('wm-card--hidden');
+      card.classList.add('wm-card--revealed');
+    }
+  }
+
   // ── Dialog state (local to this mount call) ─────────────────────────────────
   let dialogOpen = false;
   let dialogEl: HTMLElement | null = null;
@@ -35,6 +67,7 @@ export function mount(): () => void {
   }
 
   function renderDialog(trigger: 'open' | 'prev' | 'next' = 'open') {
+    markVisited(currentJob);
     dialogEl?.remove();
     const job       = jobs[currentJob];
     const isCurrent = currentJob === 0;
@@ -136,7 +169,7 @@ export function mount(): () => void {
 
   const prompt = document.createElement('div');
   prompt.className = 'wm-enter-prompt';
-  prompt.textContent = '▲ ENTER';
+  prompt.textContent = '▼ PRESS Z';
   prompt.hidden = true;
 
   const layer = document.createElement('div');
@@ -207,8 +240,11 @@ export function mount(): () => void {
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup',   onKeyUp);
 
+  // Desktop click: gate by hero proximity — encrypted nodes require the player
+  // to walk to them before they unlock. Keyboard Tab+Enter falls through to
+  // onKeyDown which already checks activeNode.
   const nodeClickCleanups = nodeButtons.map((btn, i) => {
-    const h = () => openDialog(i);
+    const h = () => { if (activeNode === i) openDialog(i); };
     btn.addEventListener('click', h);
     return () => btn.removeEventListener('click', h);
   });
@@ -223,6 +259,15 @@ export function mount(): () => void {
 
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
+
+    // Re-measure every frame — card reveals shift row layout. Without this,
+    // nodeYs/minY/maxY go stale and hero coords desync from visual node
+    // positions (hero clamps to old bounds, can't reach moved nodes).
+    nodeYs = measureNodes();
+    if (nodeYs.length === 0) return;
+    minY = nodeYs[0];
+    maxY = nodeYs[nodeYs.length - 1];
+    heroY = Math.max(minY, Math.min(maxY, heroY));
 
     const up   = keys.has('ArrowUp')   || keys.has('w') || keys.has('W');
     const down = keys.has('ArrowDown') || keys.has('s') || keys.has('S');
@@ -256,8 +301,13 @@ export function mount(): () => void {
       activeNode = newActive;
     }
 
+    // Update prompt position every frame so layout shifts don't desync it
+    if (activeNode !== -1) {
+      const nodeRect = nodeButtons[activeNode].getBoundingClientRect();
+      const tlRect   = timeline.getBoundingClientRect();
+      prompt.style.top = `${nodeRect.top - tlRect.top - 14}px`;
+    }
     prompt.hidden = activeNode === -1;
-    if (activeNode !== -1) prompt.style.top = `${heroY + 20}px`;
   }
 
   return () => {

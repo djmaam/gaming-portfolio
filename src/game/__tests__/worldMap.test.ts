@@ -195,6 +195,138 @@ describe('worldMap — proximity detection (rAF loop)', () => {
   });
 });
 
+describe('worldMap — progressive disclosure', () => {
+  let cleanup: (() => void) | undefined;
+
+  afterEach(() => {
+    cleanup?.();
+    cleanup = undefined;
+    sessionStorage.clear();
+  });
+
+  function buildDOMWithCards(count = portfolio.experience.length) {
+    document.body.innerHTML = '<div id="world-map-timeline"></div>';
+    const timeline = document.getElementById('world-map-timeline')!;
+    timeline.getBoundingClientRect = vi.fn().mockReturnValue({
+      top: 0, bottom: 500, left: 0, right: 200, width: 200, height: 500, x: 0, y: 0,
+      toJSON: vi.fn(),
+    });
+    for (let i = 0; i < count; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'wm-node';
+      btn.setAttribute('data-job-index', String(i));
+      btn.getBoundingClientRect = vi.fn().mockReturnValue({
+        top: 100 + i * 100, bottom: 120 + i * 100,
+        left: 40, right: 60, width: 20, height: 20,
+        x: 40, y: 100 + i * 100, toJSON: vi.fn(),
+      });
+      timeline.appendChild(btn);
+
+      const card = document.createElement('div');
+      card.className = 'wm-card';
+      card.setAttribute('data-job-index', String(i));
+      const content = document.createElement('div');
+      content.className = 'wm-card__content';
+      card.appendChild(content);
+      if (i !== 0) {
+        const cipher = document.createElement('div');
+        cipher.className = 'wm-card__cipher';
+        cipher.textContent = '??? ENCRYPTED';
+        card.appendChild(cipher);
+      }
+      timeline.appendChild(card);
+    }
+    return {
+      timeline,
+      nodes: Array.from(timeline.querySelectorAll<HTMLElement>('.wm-node')),
+      cards: Array.from(timeline.querySelectorAll<HTMLElement>('.wm-card')),
+    };
+  }
+
+  it('card 0 (NOW PLAYING) is never hidden on fresh mount', () => {
+    const { cards } = buildDOMWithCards();
+    cleanup = mount();
+    expect(cards[0].classList.contains('wm-card--hidden')).toBe(false);
+  });
+
+  it('cards 1-4 get wm-card--hidden on fresh mount', () => {
+    const { cards } = buildDOMWithCards();
+    cleanup = mount();
+    for (let i = 1; i < cards.length; i++) {
+      expect(cards[i].classList.contains('wm-card--hidden')).toBe(true);
+    }
+  });
+
+  it('opening dialog for node 1 reveals card 1 and persists index to sessionStorage', () => {
+    const { nodes, cards } = buildDOMWithCards();
+    cleanup = mount();
+    nodes[0].click(); // hero starts at node 0; click works
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(cards[1].classList.contains('wm-card--hidden')).toBe(false);
+    expect(cards[1].classList.contains('wm-card--revealed')).toBe(true);
+    const stored = JSON.parse(sessionStorage.getItem('gp-visited-nodes') ?? '[]') as number[];
+    expect(stored).toContain(1);
+  });
+
+  it('click on inactive node (not in hero proximity) does not open dialog', () => {
+    const { nodes } = buildDOMWithCards();
+    cleanup = mount();
+    nodes[2].click(); // hero is at node 0, node 2 is inactive
+    expect(document.querySelector('.wm-dialog-panel')).toBeNull();
+  });
+
+  it('on remount, previously visited cards start revealed not hidden', () => {
+    sessionStorage.setItem('gp-visited-nodes', JSON.stringify([1, 2]));
+    const { cards } = buildDOMWithCards();
+    cleanup = mount();
+    expect(cards[1].classList.contains('wm-card--hidden')).toBe(false);
+    expect(cards[2].classList.contains('wm-card--hidden')).toBe(false);
+    expect(cards[3].classList.contains('wm-card--hidden')).toBe(true);
+  });
+
+  it('ArrowRight in open dialog marks newly-shown job as visited and reveals its card', () => {
+    const { nodes, cards } = buildDOMWithCards();
+    cleanup = mount();
+    nodes[0].click(); // open dialog at job 0
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(cards[1].classList.contains('wm-card--hidden')).toBe(false);
+    expect(cards[1].classList.contains('wm-card--revealed')).toBe(true);
+    const stored = JSON.parse(sessionStorage.getItem('gp-visited-nodes') ?? '[]') as number[];
+    expect(stored).toContain(1);
+  });
+
+  it('NEXT button click in dialog marks newly-shown job as visited', () => {
+    const { nodes, cards } = buildDOMWithCards();
+    cleanup = mount();
+    nodes[0].click();
+    const nextBtn = document.querySelectorAll<HTMLButtonElement>('.wm-dialog__btn')[2];
+    nextBtn.click();
+    expect(cards[1].classList.contains('wm-card--hidden')).toBe(false);
+    const stored = JSON.parse(sessionStorage.getItem('gp-visited-nodes') ?? '[]') as number[];
+    expect(stored).toContain(1);
+  });
+
+  it('malformed sessionStorage JSON does not crash mount()', () => {
+    sessionStorage.setItem('gp-visited-nodes', '[1, 2,');
+    const { cards } = buildDOMWithCards();
+    expect(() => { cleanup = mount(); }).not.toThrow();
+    // Card 1 should default to hidden when visited set cannot be parsed
+    expect(cards[1].classList.contains('wm-card--hidden')).toBe(true);
+  });
+
+  it('markVisited does not write to sessionStorage when index already visited', () => {
+    sessionStorage.setItem('gp-visited-nodes', JSON.stringify([1]));
+    const { nodes } = buildDOMWithCards();
+    cleanup = mount();
+    const spy = vi.spyOn(Storage.prototype, 'setItem');
+    nodes[0].click(); // open dialog at node 0
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' })); // nav to 1
+    // Index 1 already visited → markVisited(1) early-returns without setItem
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
+});
+
 describe('worldMap — dialog keyboard navigation', () => {
   let cleanup: (() => void) | undefined;
   afterEach(() => { cleanup?.(); cleanup = undefined; });

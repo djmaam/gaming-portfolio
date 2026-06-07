@@ -30,12 +30,23 @@ Always use `bun`. Never `npm` or `yarn`.
 ## Commands
 
 ```bash
-bun run dev       # dev server (localhost:4321)
-bun run build     # production build → dist/
-bun run preview   # serve dist/ locally
+bun run dev              # dev server (localhost:4321)
+bun run build            # production build → dist/
+bun run preview          # serve dist/ locally
+bun run test             # Vitest unit tests (41 tests, 4 files)
+bun run test:coverage    # Vitest + coverage (80% thresholds enforced)
+bun run test:e2e         # Playwright E2E (11 tests, 2 spec files)
+bunx astro check         # TypeScript type-check
 ```
 
-No test suite exists yet. Type-check via `bunx astro check`.
+CI: `.github/workflows/test.yml` runs both suites on push.
+
+### Testing gotchas
+
+- Playwright headless Chromium defaults `prefers-reduced-motion: reduce` — set `reducedMotion: 'no-preference'` in test context or game states won't advance past BOOT
+- `client:idle` hydration: E2E tests must `waitForFunction(() => new Promise(r => requestAnimationFrame(r)))` before asserting game state
+- `bun run preview` auto-shifts port 4321→4322 if port occupied — `playwright.config.ts` passes `--port 4321` explicitly to prevent this
+- Game module tests (`.ts`) mock DOM via jsdom globals; React component tests (`.tsx`) use `@testing-library/react` — different setup per file type
 
 ## Architecture
 
@@ -75,6 +86,11 @@ Key conventions:
 - All animations gated on `window.matchMedia('(prefers-reduced-motion: reduce)').matches`
 - `sessionStorage` keys: `gp-booted`, `gp-visited-nodes`, `gp-collected-skills`
 - Cross-module key conflict guard: check `menuList?.contains(document.activeElement)` before firing Z/Enter actions in worldMap
+
+### Docs structure
+
+- `docs/superpowers/specs/` — design specs (checked in)
+- `docs/superpowers/plans/` — implementation plans (checked in)
 
 ### Data layer
 

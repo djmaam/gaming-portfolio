@@ -1,41 +1,47 @@
 ---
 import PixelPanel from './PixelPanel.astro';
-import { portfolio } from '../data/portfolio';
+import { portfolio, type Experience } from '../data/portfolio';
 ---
 
 <PixelPanel accent="yellow" label="WORLD MAP · CAREER STAGES" class="world-map">
   <div class="wm-timeline" id="world-map-timeline">
-    {portfolio.experience.map((job, i) => {
-      const nodeNum = portfolio.experience.length - i;
-      const isCurrent = i === 0;
+    {portfolio.experience.map((job: Experience, i: number) => {
+      const isNow = job.status === 'NOW PLAYING';
       return (
         <div class="wm-row">
-          <!-- Left rail -->
           <div class="wm-rail">
             <button
-              class:list={['wm-node', isCurrent && 'wm-node--current']}
-              aria-label={`Career stage ${nodeNum} — ${job.company}, ${job.role}${isCurrent ? ', currently playing' : ''}`}
+              class:list={['wm-node', isNow && 'wm-node--current']}
+              aria-label={`Level ${job.lvl} — ${job.company}, ${job.role}${isNow ? ', currently playing' : ''}`}
               data-job-index={i}
             >
-              {nodeNum}
+              {job.lvl}
             </button>
             {i < portfolio.experience.length - 1 && (
               <div class="wm-connector" aria-hidden="true"></div>
             )}
           </div>
 
-          <!-- Job card -->
           <div class="wm-card">
             <div class="wm-card__header">
               <span class="wm-card__company">{job.company}</span>
-              {isCurrent
-                ? <span class="wm-card__status wm-card__status--now">▶ NOW PLAYING</span>
-                : <span class="wm-card__status wm-card__status--cleared">✓ CLEARED · {job.year}</span>
-              }
+              <span class:list={['wm-card__status', isNow ? 'wm-card__status--now' : 'wm-card__status--cleared']}>
+                {isNow ? '▶' : '✓'} {job.status}
+              </span>
             </div>
+            <p class="wm-card__lvl">[LVL {job.lvl}]</p>
             <p class="wm-card__role">{job.role}</p>
             <p class="wm-card__tech">{job.tech}</p>
-            <p class="wm-card__note">{job.note}</p>
+            {job.bullets.length > 0 && (
+              <ul class="wm-card__bullets">
+                {job.bullets.map((b: string) => (
+                  <li class="wm-card__bullet">{b}</li>
+                ))}
+              </ul>
+            )}
+            {job.bullets.length === 0 && (
+              <p class="wm-card__note">{job.note}</p>
+            )}
           </div>
         </div>
       );
@@ -55,7 +61,6 @@ import { portfolio } from '../data/portfolio';
     align-items: flex-start;
   }
 
-  /* Left rail */
   .wm-rail {
     width: 54px;
     flex-shrink: 0;
@@ -105,7 +110,6 @@ import { portfolio } from '../data/portfolio';
     margin: 4px 0;
   }
 
-  /* Job card */
   .wm-card {
     flex: 1;
     padding: 6px 0 20px;
@@ -136,6 +140,13 @@ import { portfolio } from '../data/portfolio';
   .wm-card__status--now     { color: var(--c-green); }
   .wm-card__status--cleared { color: var(--c-yellow); }
 
+  .wm-card__lvl {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: var(--c-dim);
+    margin-bottom: 4px;
+  }
+
   .wm-card__role {
     font-family: 'Silkscreen', monospace;
     font-size: var(--fs-role);
@@ -154,5 +165,29 @@ import { portfolio } from '../data/portfolio';
     font-family: 'Silkscreen', monospace;
     font-size: var(--fs-tech);
     color: var(--c-faint);
+  }
+
+  .wm-card__bullets {
+    list-style: none;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .wm-card__bullet {
+    font-family: 'Silkscreen', monospace;
+    font-size: var(--fs-tech);
+    color: var(--c-ink);
+    line-height: 1.5;
+    padding-left: 12px;
+    position: relative;
+  }
+
+  .wm-card__bullet::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--c-yellow);
   }
 </style>

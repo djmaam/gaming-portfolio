@@ -1,0 +1,78 @@
+---
+import PixelPanel from './PixelPanel.astro';
+import { portfolio } from '../data/portfolio';
+
+const PERK_COLORS = [
+  'var(--c-yellow)',
+  'var(--c-green)',
+  'var(--c-cyan)',
+];
+---
+
+<PixelPanel accent="pink" label="✦ PERKS & STAT MODIFIERS" class="perks-panel">
+  <div class="perks-list">
+    {portfolio.perks.map((perk, i) => (
+      <div class="perk-row">
+        <span class="perk-row__icon" aria-hidden="true">{perk.icon}</span>
+        <div class="perk-row__body">
+          <p class="perk-row__name" style={`color:${PERK_COLORS[i % PERK_COLORS.length]}`}>
+            {perk.name}
+            <span class="perk-row__tag">{perk.tag}</span>
+          </p>
+          <p class="perk-row__desc">{perk.description}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</PixelPanel>
+
+<style>
+  .perks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .perk-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    background: var(--c-panelHi);
+    box-shadow: 0 0 0 1px var(--c-faint);
+  }
+
+  .perk-row__icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+  }
+
+  .perk-row__body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .perk-row__name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+  }
+
+  .perk-row__tag {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: var(--c-dim);
+    margin-left: 8px;
+  }
+
+  .perk-row__desc {
+    font-family: 'Silkscreen', monospace;
+    font-size: 13px;
+    color: var(--c-ink);
+    line-height: 1.5;
+  }
+</style>

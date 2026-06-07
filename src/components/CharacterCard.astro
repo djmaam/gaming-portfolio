@@ -1,6 +1,7 @@
 ---
 import PixelPanel from './PixelPanel.astro';
 import HeroSprite from './HeroSprite.astro';
+import { portfolio } from '../data/portfolio';
 ---
 
 <PixelPanel accent="green" label="▶ PLAYER 1" class="char-card">
@@ -10,7 +11,7 @@ import HeroSprite from './HeroSprite.astro';
       <div class="char-card__shadow" aria-hidden="true"></div>
     </div>
     <p class="char-card__handle">@djmaam</p>
-    <p class="char-card__class">CLASS · FULL-STACK MAGE</p>
+    <p class="char-card__class">CLASS · {portfolio.class}</p>
     <p class="char-card__home">HOME · ARGENTINA</p>
   </div>
 </PixelPanel>

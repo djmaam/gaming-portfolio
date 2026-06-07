@@ -5,10 +5,12 @@ import TitleBlock from '../components/TitleBlock.astro';
 import CharacterCard from '../components/CharacterCard.astro';
 import AbilityStats from '../components/AbilityStats.astro';
 import QuestLog from '../components/QuestLog.astro';
+import PerksPanel from '../components/PerksPanel.astro';
 import SkillTree from '../components/SkillTree.astro';
 import WorldMap from '../components/WorldMap.astro';
 import StartMenu from '../components/StartMenu.astro';
 import GameLayer from '../game/GameLayer';
+import { portfolio } from '../data/portfolio';
 ---
 
 <Base>
@@ -23,13 +25,14 @@ import GameLayer from '../game/GameLayer';
     </div>
 
     <QuestLog />
+    <PerksPanel />
     <SkillTree />
     <WorldMap />
     <StartMenu />
   </div>
 
   <footer class="site-footer">
-    © 20XX MARCOS ARRIETA · INSERT COIN TO CONTINUE
+    {portfolio.footerText}
   </footer>
 </Base>
 

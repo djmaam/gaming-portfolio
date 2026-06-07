@@ -7,7 +7,6 @@ const RARITY = [
   { tag: 'EPIC',      color: 'var(--c-purple)' },
   { tag: 'EPIC',      color: 'var(--c-purple)' },
   { tag: 'RARE',      color: 'var(--c-cyan)'   },
-  { tag: 'RARE',      color: 'var(--c-cyan)'   },
   { tag: 'COMMON',    color: 'var(--c-green)'  },
 ];
 ---
@@ -31,6 +30,7 @@ const RARITY = [
       );
     })}
   </div>
+  <p class="skill-tree__note">{portfolio.skillTreeNote}</p>
 </PixelPanel>
 
 <style>
@@ -93,5 +93,13 @@ const RARITY = [
     .skill-tree__grid {
       grid-template-columns: 1fr;
     }
+  }
+
+  .skill-tree__note {
+    font-family: 'Silkscreen', monospace;
+    font-size: 12px;
+    color: var(--c-dim);
+    margin-top: 14px;
+    line-height: 1.5;
   }
 </style>

@@ -260,6 +260,15 @@ export function mount(): () => void {
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
 
+    // Re-measure every frame — card reveals shift row layout. Without this,
+    // nodeYs/minY/maxY go stale and hero coords desync from visual node
+    // positions (hero clamps to old bounds, can't reach moved nodes).
+    nodeYs = measureNodes();
+    if (nodeYs.length === 0) return;
+    minY = nodeYs[0];
+    maxY = nodeYs[nodeYs.length - 1];
+    heroY = Math.max(minY, Math.min(maxY, heroY));
+
     const up   = keys.has('ArrowUp')   || keys.has('w') || keys.has('W');
     const down = keys.has('ArrowDown') || keys.has('s') || keys.has('S');
     const dy   = (down ? 1 : 0) - (up ? 1 : 0);
@@ -290,15 +299,14 @@ export function mount(): () => void {
         if (i !== 0) btn.classList.toggle('wm-node--active', i === newActive);
       });
       activeNode = newActive;
-      if (activeNode !== -1) {
-        // Live rect read — survives layout shifts from card reveals
-        const nodeRect = nodeButtons[activeNode].getBoundingClientRect();
-        const tlRect   = timeline.getBoundingClientRect();
-        // Place prompt above the node so arrow points down at the LVL circle
-        prompt.style.top = `${nodeRect.top - tlRect.top - 14}px`;
-      }
     }
 
+    // Update prompt position every frame so layout shifts don't desync it
+    if (activeNode !== -1) {
+      const nodeRect = nodeButtons[activeNode].getBoundingClientRect();
+      const tlRect   = timeline.getBoundingClientRect();
+      prompt.style.top = `${nodeRect.top - tlRect.top - 14}px`;
+    }
     prompt.hidden = activeNode === -1;
   }
 

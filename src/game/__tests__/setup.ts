@@ -40,6 +40,16 @@ Object.defineProperty(document, 'visibilityState', {
   value: 'visible',
 });
 
+// Canvas 2D context — happy-dom does not implement the Canvas API; stub it out
+// so worldMap.ts can call drawSprite() without crashing.
+const mockCtx = {
+  clearRect: vi.fn(),
+  fillRect: vi.fn(),
+  get fillStyle() { return ''; },
+  set fillStyle(_v: string) {},
+};
+HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(mockCtx) as never;
+
 // performance.now — returns 0 at mount; loop uses the rAF `now` param, not this
 vi.spyOn(performance, 'now').mockReturnValue(0);
 

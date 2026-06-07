@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { mount } from '../menuCursor';
 
 function buildDOM() {
@@ -11,21 +11,24 @@ function buildDOM() {
 }
 
 describe('menuCursor', () => {
+  let cleanup: (() => void) | undefined;
+  afterEach(() => { cleanup?.(); cleanup = undefined; });
+
   it('returns no-op cleanup when #start-menu-list missing', () => {
-    const cleanup = mount();
-    expect(() => cleanup()).not.toThrow();
+    cleanup = mount();
+    expect(() => cleanup!()).not.toThrow();
+    cleanup = undefined;
   });
 
   it('mount returns a function', () => {
     buildDOM();
-    const cleanup = mount();
+    cleanup = mount();
     expect(typeof cleanup).toBe('function');
-    cleanup();
   });
 
   it('focusin on .menu-row child adds menu-row--selected to that row', () => {
     buildDOM();
-    mount();
+    cleanup = mount();
     const rows = document.querySelectorAll('.menu-row');
     const link = rows[0].querySelector('a')!;
     link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
@@ -35,7 +38,7 @@ describe('menuCursor', () => {
 
   it('focusin switches selection away from previous row', () => {
     buildDOM();
-    mount();
+    cleanup = mount();
     const rows = document.querySelectorAll('.menu-row');
     rows[0].querySelector('a')!.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
     rows[1].querySelector('a')!.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
@@ -45,7 +48,7 @@ describe('menuCursor', () => {
 
   it('Z key clicks the anchor inside selected row when focus is inside the list', () => {
     buildDOM();
-    mount();
+    cleanup = mount();
     const rows = document.querySelectorAll('.menu-row');
     rows[0].classList.add('menu-row--selected');
     const link = rows[0].querySelector('a')!;
@@ -58,7 +61,7 @@ describe('menuCursor', () => {
 
   it('Z key is no-op when focused element is outside the list', () => {
     buildDOM();
-    mount();
+    cleanup = mount();
     const rows = document.querySelectorAll('.menu-row');
     rows[0].classList.add('menu-row--selected');
     const link = rows[0].querySelector('a')!;
@@ -72,7 +75,7 @@ describe('menuCursor', () => {
 
   it('Z key is no-op when an INPUT is focused inside the list', () => {
     buildDOM();
-    mount();
+    cleanup = mount();
     const list = document.getElementById('start-menu-list')!;
     const input = document.createElement('input');
     list.appendChild(input);
@@ -87,21 +90,23 @@ describe('menuCursor', () => {
 
   it('cleanup removes the keydown listener', () => {
     buildDOM();
-    const cleanup = mount();
+    cleanup = mount();
     const rows = document.querySelectorAll('.menu-row');
     rows[0].classList.add('menu-row--selected');
     const link = rows[0].querySelector('a')!;
     const clickSpy = vi.spyOn(link, 'click').mockImplementation(() => {});
     Object.defineProperty(document, 'activeElement', { value: link, configurable: true });
     cleanup();
+    cleanup = undefined;
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z' }));
     expect(clickSpy).not.toHaveBeenCalled();
   });
 
   it('cleanup removes the focusin listener', () => {
     buildDOM();
-    const cleanup = mount();
+    cleanup = mount();
     cleanup();
+    cleanup = undefined;
     const rows = document.querySelectorAll('.menu-row');
     rows[0].querySelector('a')!.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
     expect(rows[0].classList.contains('menu-row--selected')).toBe(false);

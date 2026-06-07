@@ -60,17 +60,20 @@ test.describe('WorldMap dialog', () => {
       hasTouch: true,
       // pointer: coarse is inferred from hasTouch in Chromium
     });
-    const page = await ctx.newPage();
-    await page.addInitScript(() => sessionStorage.setItem('gp-booted', '1'));
-    await page.goto('/');
-    await expect(page.locator('#world-map-timeline')).toBeVisible({ timeout: 10_000 });
-    // Wait for React hydration (client:idle) so mountWorldMap() has run
-    await page.waitForLoadState('networkidle');
-    // On touch device (pointer: coarse), hero canvas is never injected
-    await expect(page.locator('.wm-hero-canvas')).not.toBeVisible();
-    // Tapping a node directly opens the dialog
-    await page.locator('.wm-node').first().tap();
-    await expect(page.locator('.wm-dialog-panel')).toBeVisible({ timeout: 5_000 });
-    await ctx.close();
+    try {
+      const page = await ctx.newPage();
+      await page.addInitScript(() => sessionStorage.setItem('gp-booted', '1'));
+      await page.goto('/');
+      await expect(page.locator('#world-map-timeline')).toBeVisible({ timeout: 10_000 });
+      // Wait for React hydration (client:idle) so mountWorldMap() has run
+      await page.waitForLoadState('networkidle');
+      // On touch device (pointer: coarse), hero canvas is never injected
+      await expect(page.locator('.wm-hero-canvas')).not.toBeVisible();
+      // Tapping a node directly opens the dialog
+      await page.locator('.wm-node').first().tap();
+      await expect(page.locator('.wm-dialog-panel')).toBeVisible({ timeout: 5_000 });
+    } finally {
+      await ctx.close();
+    }
   });
 });

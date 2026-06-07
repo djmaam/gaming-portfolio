@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '../worldMap';
 import { portfolio } from '../../data/portfolio';
 
@@ -67,6 +67,9 @@ describe('worldMap — mount guards', () => {
 });
 
 describe('worldMap — touch mode (pointer: coarse)', () => {
+  let cleanup: (() => void) | undefined;
+  afterEach(() => { cleanup?.(); cleanup = undefined; });
+
   beforeEach(() => {
     vi.mocked(window.matchMedia).mockImplementation((query) => ({
       matches: query === '(pointer: coarse)',
@@ -80,13 +83,13 @@ describe('worldMap — touch mode (pointer: coarse)', () => {
 
   it('does not create hero canvas on touch device', () => {
     buildDOM();
-    mount();
+    cleanup = mount();
     expect(document.querySelector('.wm-hero-canvas')).toBeNull();
   });
 
   it('node button click opens dialog with correct job data', () => {
     buildDOM();
-    mount();
+    cleanup = mount();
     const nodes = document.querySelectorAll('.wm-node');
     (nodes[0] as HTMLElement).click();
     const panel = document.querySelector('.wm-dialog-panel');
@@ -99,11 +102,12 @@ describe('worldMap — touch mode (pointer: coarse)', () => {
 
   it('cleanup removes node click listeners and closes dialog', () => {
     buildDOM();
-    const cleanup = mount();
+    cleanup = mount();
     const nodes = document.querySelectorAll('.wm-node');
     (nodes[0] as HTMLElement).click();
     expect(document.querySelector('.wm-dialog-panel')).not.toBeNull();
     cleanup();
+    cleanup = undefined;
     expect(document.querySelector('.wm-dialog-panel')).toBeNull();
     // After cleanup, clicking again should not reopen
     (nodes[0] as HTMLElement).click();
@@ -112,15 +116,18 @@ describe('worldMap — touch mode (pointer: coarse)', () => {
 });
 
 describe('worldMap — desktop mode', () => {
+  let cleanup: (() => void) | undefined;
+  afterEach(() => { cleanup?.(); cleanup = undefined; });
+
   it('injects hero canvas into timeline', () => {
     buildDOM();
-    mount();
+    cleanup = mount();
     expect(document.querySelector('.wm-hero-canvas')).not.toBeNull();
   });
 
   it('node button click opens dialog in desktop mode', () => {
     buildDOM();
-    mount();
+    cleanup = mount();
     const nodes = document.querySelectorAll('.wm-node');
     (nodes[0] as HTMLElement).click();
     expect(document.querySelector('.wm-dialog-panel')).not.toBeNull();
@@ -128,27 +135,32 @@ describe('worldMap — desktop mode', () => {
 
   it('cleanup removes canvas and restores timeline position', () => {
     const { timeline } = buildDOM();
-    const cleanup = mount();
+    cleanup = mount();
     expect(timeline.querySelector('.wm-hero-layer')).not.toBeNull();
     cleanup();
+    cleanup = undefined;
     expect(timeline.querySelector('.wm-hero-layer')).toBeNull();
     expect(timeline.style.position).toBe('');
   });
 
   it('cleanup closes any open dialog', () => {
     buildDOM();
-    const cleanup = mount();
+    cleanup = mount();
     document.querySelector<HTMLElement>('.wm-node')!.click();
     expect(document.querySelector('.wm-dialog-panel')).not.toBeNull();
     cleanup();
+    cleanup = undefined;
     expect(document.querySelector('.wm-dialog-panel')).toBeNull();
   });
 });
 
 describe('worldMap — proximity detection (rAF loop)', () => {
+  let cleanup: (() => void) | undefined;
+  afterEach(() => { cleanup?.(); cleanup = undefined; });
+
   it('prompt is visible when hero starts at node 0 Y', () => {
     buildDOM(2);
-    mount();
+    cleanup = mount();
     // hero starts at minY = 110 (node 0 center), no movement, run one frame
     tick(0); // dt = (0 - 0) / 1000 = 0, no movement
     const prompt = document.querySelector<HTMLElement>('.wm-enter-prompt')!;
@@ -157,12 +169,13 @@ describe('worldMap — proximity detection (rAF loop)', () => {
 
   it('prompt is hidden when hero is far from all nodes', () => {
     buildDOM(2);
-    mount();
+    cleanup = mount();
     // Move hero toward node 1 (Y=210) so it sits at Y≈160, >24px from both
     // At 120px/s with dt=0.05 (capped), each tick = 6px. Need ~8 ticks to reach 160.
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     let t = 0;
     for (let i = 0; i < 9; i++) { t += 50; tick(t); }
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowDown' }));
     // heroY ≈ 110 + 9*6 = 164, dist to node 0 (110) = 54 > 24, dist to node 1 (210) = 46 > 24
     const prompt = document.querySelector<HTMLElement>('.wm-enter-prompt')!;
     expect(prompt.hidden).toBe(true);
@@ -170,11 +183,12 @@ describe('worldMap — proximity detection (rAF loop)', () => {
 
   it('node 1 gets wm-node--active when hero is within PROX of it', () => {
     buildDOM(2);
-    mount();
+    cleanup = mount();
     // Move hero all the way to node 1 (Y=210): need (210-110)/6 ≈ 17 ticks
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     let t = 0;
     for (let i = 0; i < 20; i++) { t += 50; tick(t); }
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowDown' }));
     // heroY capped at maxY = 210 (node 1 center), dist = 0 ≤ 24
     const nodes = document.querySelectorAll('.wm-node');
     expect(nodes[1].classList.contains('wm-node--active')).toBe(true);
@@ -182,9 +196,12 @@ describe('worldMap — proximity detection (rAF loop)', () => {
 });
 
 describe('worldMap — dialog keyboard navigation', () => {
+  let cleanup: (() => void) | undefined;
+  afterEach(() => { cleanup?.(); cleanup = undefined; });
+
   beforeEach(() => {
     buildDOM(portfolio.experience.length);
-    mount();
+    cleanup = mount();
     document.querySelector<HTMLElement>('.wm-node')!.click();
   });
 

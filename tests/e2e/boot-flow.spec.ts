@@ -51,12 +51,15 @@ test.describe('Boot flow', () => {
 
   test('prefers-reduced-motion: reduce skips BOOT', async ({ browser }) => {
     const ctx = await browser.newContext({ reducedMotion: 'reduce' });
-    const page = await ctx.newPage();
-    await page.addInitScript(() => sessionStorage.clear());
-    await page.goto('/');
-    // After hydration, BOOT should be skipped → land in EXPLORE (GameLayer returns null)
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('.gp-boot')).not.toBeVisible();
-    await ctx.close();
+    try {
+      const page = await ctx.newPage();
+      await page.addInitScript(() => sessionStorage.clear());
+      await page.goto('/');
+      // After hydration, BOOT should be skipped → land in EXPLORE (GameLayer returns null)
+      await page.waitForLoadState('networkidle');
+      await expect(page.locator('.gp-boot')).not.toBeVisible();
+    } finally {
+      await ctx.close();
+    }
   });
 });

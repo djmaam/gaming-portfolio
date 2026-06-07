@@ -1,4 +1,5 @@
 import { portfolio, SP, cmap } from '../data/portfolio';
+import { dispatchStatUpdate, VISITED_KEY } from './gameStats';
 import './worldMap.css';
 
 const SPEED = 120; // px/s
@@ -13,7 +14,6 @@ export function mount(): () => void {
   const jobs      = portfolio.experience;
 
   // ── Progressive disclosure ───────────────────────────────────────────────────
-  const VISITED_KEY = 'gp-visited-nodes';
   const visited = new Set<number>();
   try {
     const raw = sessionStorage.getItem(VISITED_KEY);
@@ -22,6 +22,16 @@ export function mount(): () => void {
       if (Array.isArray(parsed)) parsed.forEach(n => typeof n === 'number' && visited.add(n));
     }
   } catch { /* malformed JSON or storage blocked — start with empty set */ }
+
+  // Node 0 (NOW PLAYING) is always revealed; seed it into the visited set so
+  // HUD NODES counter and sessionStorage agree with what the player has seen.
+  if (!visited.has(0)) {
+    visited.add(0);
+    try {
+      sessionStorage.setItem(VISITED_KEY, JSON.stringify([...visited]));
+    } catch { /* storage blocked — in-memory state still correct */ }
+    dispatchStatUpdate({ nodes: visited.size });
+  }
 
   const cardByIndex = new Map<number, HTMLElement>();
   Array.from(document.querySelectorAll<HTMLElement>('.wm-card[data-job-index]')).forEach(card => {
@@ -32,7 +42,7 @@ export function mount(): () => void {
   });
 
   function markVisited(index: number) {
-    if (index === 0 || visited.has(index)) return;
+    if (visited.has(index)) return;
     visited.add(index);
     try {
       sessionStorage.setItem(VISITED_KEY, JSON.stringify([...visited]));
@@ -42,6 +52,7 @@ export function mount(): () => void {
       card.classList.remove('wm-card--hidden');
       card.classList.add('wm-card--revealed');
     }
+    dispatchStatUpdate({ nodes: visited.size });
   }
 
   // ── Dialog state (local to this mount call) ─────────────────────────────────

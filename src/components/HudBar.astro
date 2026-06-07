@@ -1,5 +1,5 @@
 ---
-// Panel A — HUD Bar
+import { NODES_TOTAL, SKILLS_TOTAL } from '../game/gameStats';
 ---
 
 <div class="hud">
@@ -15,7 +15,17 @@
     <div class="hud__fill hud__fill--xp"></div>
   </div>
 
-  <span class="hud__stars">★99</span>
+  <span class="hud__live" aria-live="polite" aria-atomic="true">
+    <span class="hud__stat hud__stat--nodes">
+      <span class="hud__stat-label">NODES</span>
+      <span class="hud__stat-value" id="hud-nodes">0/{NODES_TOTAL}</span>
+    </span>
+    <span class="hud__stat hud__stat--skills">
+      <span class="hud__stat-label">SKILLS</span>
+      <span class="hud__stat-value" id="hud-skills">0/{SKILLS_TOTAL}</span>
+    </span>
+    <span class="hud__level" id="hud-level">LV.1</span>
+  </span>
 
   <span class="hud__coin" aria-hidden="true"></span>
   <span class="hud__coinx">x∞</span>
@@ -24,6 +34,31 @@
     🔇
   </button>
 </div>
+
+<script>
+  // Pre-hydration seed: runs once before GameLayer's client:idle hydration to
+  // avoid a flash of "0/N" when sessionStorage already has progress.
+  // Single source of truth: imports from gameStats. If hydration strategy
+  // changes from client:idle to client:load, audit execution order.
+  import {
+    NODES_TOTAL,
+    SKILLS_TOTAL,
+    computeLevel,
+    readNodesCount,
+    readSkillsCount,
+  } from '../game/gameStats';
+
+  const n = readNodesCount();
+  const s = readSkillsCount();
+  const lv = computeLevel(n, s);
+  const set = (id: string, txt: string) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = txt;
+  };
+  set('hud-nodes',  `${n}/${NODES_TOTAL}`);
+  set('hud-skills', `${s}/${SKILLS_TOTAL}`);
+  set('hud-level',  `LV.${lv}`);
+</script>
 
 <style>
   .hud {
@@ -37,8 +72,24 @@
   }
 
   .hud__1up   { color: var(--c-green); }
-  .hud__stars { color: var(--c-yellow); }
   .hud__coinx { color: var(--c-ink); font-size: 8px; }
+
+  .hud__live        { display: inline-flex; align-items: center; gap: 14px; }
+  .hud__stat        { display: inline-flex; align-items: center; gap: 4px; }
+  .hud__stat-label  { font-size: 8px; }
+  .hud__stat--nodes  .hud__stat-label { color: var(--c-green); }
+  .hud__stat--skills .hud__stat-label { color: var(--c-cyan); }
+  .hud__stat-value  { font-size: var(--fs-hud); color: var(--c-ink); }
+
+  .hud__level { color: var(--c-yellow); font-size: var(--fs-hud); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hud__level--flash { animation: hud-level-flash 0.45s steps(1, end) 3; }
+  }
+  @keyframes hud-level-flash {
+    0%, 49%   { color: var(--c-yellow); }
+    50%, 100% { color: #fff; }
+  }
 
   .hud__label { font-size: 8px; }
   .hud__label--hp { color: var(--c-red); }
@@ -96,8 +147,8 @@
   }
 
   @media (max-width: 680px) {
-    .hud__stars,
     .hud__coin,
     .hud__coinx { display: none; }
+    .hud__stat-label { display: none; }
   }
 </style>

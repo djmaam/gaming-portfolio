@@ -3,7 +3,7 @@ import PixelPanel from './PixelPanel.astro';
 import { portfolio, type Experience } from '../data/portfolio';
 ---
 
-<PixelPanel accent="yellow" label="WORLD MAP · CAREER STAGES" class="world-map">
+<PixelPanel accent="yellow" label="WORLD MAP · CAREER STAGES" class="world-map" reveal="fade">
   <div class="wm-timeline" id="world-map-timeline">
     {portfolio.experience.map((job: Experience, i: number) => {
       const isNow = job.status === 'NOW PLAYING';

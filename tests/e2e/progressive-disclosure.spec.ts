@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './_fixtures';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -63,6 +63,7 @@ test.describe('WorldMap progressive disclosure', () => {
     const ctx = await browser.newContext();
     try {
       const page = await ctx.newPage();
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.addInitScript(() => {
         sessionStorage.setItem('gp-booted', '1');
         sessionStorage.setItem('gp-visited-nodes', JSON.stringify([1]));

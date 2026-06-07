@@ -68,6 +68,31 @@
     33%  { content: '..'; }
     66%  { content: '...'; }
   }
+
+  @keyframes panel-reveal-slide-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes panel-reveal-slide-left {
+    from { opacity: 0; transform: translateX(-20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes panel-reveal-slide-right {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes panel-reveal-scale-pop {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes panel-reveal-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
 }
 
 /* Global resets */
@@ -143,5 +168,33 @@ html, body {
 @media (prefers-reduced-motion: no-preference) {
   .blink {
     animation: blink 1.1s steps(1) infinite;
+  }
+}
+
+/* Panel scroll-reveal (GP-20) — hidden initial state + animated entrance.
+   Triple-gated:
+     1. prefers-reduced-motion: no-preference (CSS-level motion preference)
+     2. html.gp-armed (set by inline head script — proves JS is alive)
+     3. .pixel-panel[data-reveal] (opt-IN per panel — panels without the
+        attr stay visible by default; future .pixel-panel reuses are safe)
+   gp-reveal-fallback class (set 1.5s after gp-armed by the same head script)
+   force-reveals every panel — safety net for stalled client:idle hydration. */
+@media (prefers-reduced-motion: no-preference) {
+  .gp-armed .pixel-panel[data-reveal]:not(.panel--revealed) {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .gp-armed .pixel-panel.panel--revealed {
+    animation: panel-reveal-slide-up 0.35s cubic-bezier(0, 0, 0.2, 1) both;
+  }
+  .gp-armed .pixel-panel[data-reveal="slide-left"].panel--revealed  { animation-name: panel-reveal-slide-left; }
+  .gp-armed .pixel-panel[data-reveal="slide-right"].panel--revealed { animation-name: panel-reveal-slide-right; }
+  .gp-armed .pixel-panel[data-reveal="scale-pop"].panel--revealed   { animation-name: panel-reveal-scale-pop; }
+  .gp-armed .pixel-panel[data-reveal="fade"].panel--revealed        { animation-name: panel-reveal-fade; }
+
+  .gp-reveal-fallback .pixel-panel[data-reveal]:not(.panel--revealed) {
+    opacity: 1;
+    visibility: visible;
   }
 }

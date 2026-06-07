@@ -40,6 +40,33 @@ Object.defineProperty(document, 'visibilityState', {
   value: 'visible',
 });
 
+// IntersectionObserver — happy-dom does not implement it. Mock captures the
+// most-recently-constructed instance + exposes a trigger() helper so tests can
+// drive the callback. panelReveal.ts only ever uses one observer at a time.
+type IOEntryLike = Partial<IntersectionObserverEntry> & { target: Element; isIntersecting: boolean };
+class MockIntersectionObserver {
+  static last: MockIntersectionObserver | null = null;
+  callback: IntersectionObserverCallback;
+  options: IntersectionObserverInit | undefined;
+  observed = new Set<Element>();
+  observe = vi.fn((el: Element) => { this.observed.add(el); });
+  unobserve = vi.fn((el: Element) => { this.observed.delete(el); });
+  disconnect = vi.fn(() => { this.observed.clear(); });
+  constructor(cb: IntersectionObserverCallback, opts?: IntersectionObserverInit) {
+    this.callback = cb;
+    this.options = opts;
+    MockIntersectionObserver.last = this;
+  }
+  trigger(entries: IOEntryLike[]): void {
+    this.callback(entries as IntersectionObserverEntry[], this as unknown as IntersectionObserver);
+  }
+}
+Object.defineProperty(window, 'IntersectionObserver', {
+  writable: true,
+  value: MockIntersectionObserver,
+});
+export { MockIntersectionObserver };
+
 // Canvas 2D context — happy-dom does not implement the Canvas API; stub it out
 // so worldMap.ts can call drawSprite() without crashing.
 const mockCtx = {
@@ -57,6 +84,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   sessionStorage.clear();
   document.body.innerHTML = '';
+  MockIntersectionObserver.last = null;
   // Re-apply after clearAllMocks since matchMedia is a vi.fn()
   vi.mocked(window.matchMedia).mockImplementation((query: string) => ({
     matches: false,

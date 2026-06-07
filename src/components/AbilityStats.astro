@@ -11,7 +11,7 @@ const CELL_COLORS = ['var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(
       const filled = Math.round(stat.lvl / 10);
       const lv = Math.round(stat.lvl / 10);
       return (
-        <div class="stat-row">
+        <div class="stat-row" data-lvl={lv}>
           <div class="stat-row__header">
             <span class="stat-row__label">{stat.label}</span>
             <span class="stat-row__lv">LV{lv}</span>

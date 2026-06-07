@@ -59,11 +59,12 @@ export default function GameLayer() {
 
   useEffect(() => {
     if (state !== 'EXPLORE') return;
-    const cleanupStats    = mountGameStats();
-    const cleanupCursor   = mountCursor();
-    const cleanupWorldMap = mountWorldMap();
-    const cleanupPanels   = mountPanelReveal();
-    return () => { cleanupCursor(); cleanupWorldMap(); cleanupStats(); cleanupPanels(); };
+    // Mount order: stats first (HUD listeners), then cursor/worldMap (DOM
+    // measurements), then panelReveal LAST so above-the-fold panels reveal
+    // immediately on IO auto-fire after siblings have settled their layout.
+    const mounts = [mountGameStats, mountCursor, mountWorldMap, mountPanelReveal];
+    const cleanups = mounts.map(m => m());
+    return () => { cleanups.forEach(c => c()); };
   }, [state]);
 
   if (state === 'EXPLORE') return null;

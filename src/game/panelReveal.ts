@@ -1,32 +1,58 @@
 export const REVEALED_CLASS = 'panel--revealed';
 export const STAGGER_MS     = 60;
-const THRESHOLD             = 0.12;
+export const ROW_TOLERANCE_PX = 16;
+const THRESHOLD             = 0;
+
+function revealAll(panels: HTMLElement[]): void {
+  panels.forEach(p => p.classList.add(REVEALED_CLASS));
+}
 
 export function mount(): () => void {
-  const panels = Array.from(document.querySelectorAll<HTMLElement>('.pixel-panel'));
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('.pixel-panel[data-reveal]'));
   if (!panels.length) return () => {};
 
   const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (isReduced) {
-    panels.forEach(p => p.classList.add(REVEALED_CLASS));
+  if (isReduced || typeof IntersectionObserver === 'undefined') {
+    revealAll(panels);
     return () => {};
   }
 
-  let remaining = panels.length;
+  const timers = new Set<ReturnType<typeof setTimeout>>();
+
   const io = new IntersectionObserver((entries) => {
     const visible = entries
-      .filter(e => e.isIntersecting)
+      .filter(e => e.isIntersecting && !e.target.classList.contains(REVEALED_CLASS))
       .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-    visible.forEach((entry, i) => {
+    if (!visible.length) return;
+
+    // Row-grouping: panels sharing a horizontal row (top within tolerance)
+    // get the SAME stagger index so side-by-side grid cells animate together
+    // instead of stuttering 60ms apart.
+    let lastTop = -Infinity;
+    let rowIdx = -1;
+    for (const entry of visible) {
+      const top = entry.boundingClientRect.top;
+      if (top - lastTop > ROW_TOLERANCE_PX) rowIdx++;
+      lastTop = top;
       const el = entry.target as HTMLElement;
-      el.style.animationDelay = `${i * STAGGER_MS}ms`;
-      el.classList.add(REVEALED_CLASS);
       io.unobserve(el);
-      remaining--;
-    });
-    if (remaining <= 0) io.disconnect();
+      if (rowIdx === 0) {
+        el.classList.add(REVEALED_CLASS);
+      } else {
+        const tid = setTimeout(() => {
+          timers.delete(tid);
+          el.classList.add(REVEALED_CLASS);
+        }, rowIdx * STAGGER_MS);
+        timers.add(tid);
+      }
+    }
   }, { threshold: THRESHOLD });
 
   panels.forEach(p => io.observe(p));
-  return () => io.disconnect();
+
+  return () => {
+    io.disconnect();
+    timers.forEach(clearTimeout);
+    timers.clear();
+  };
 }

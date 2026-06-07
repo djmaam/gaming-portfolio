@@ -5,7 +5,7 @@ import { portfolio } from '../data/portfolio';
 const CELL_COLORS = ['var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-yellow)', 'var(--c-yellow)', 'var(--c-red)', 'var(--c-red)'];
 ---
 
-<PixelPanel accent="red" label="ABILITY STATS" class="ability-stats">
+<PixelPanel accent="red" label="ABILITY STATS" class="ability-stats" reveal="slide-up">
   <div class="stats-list">
     {portfolio.stats.map(stat => {
       const filled = Math.round(stat.lvl / 10);

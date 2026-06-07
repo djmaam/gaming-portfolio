@@ -8,10 +8,13 @@ export interface Props {
   reveal?: RevealVariant;
 }
 
-const { accent, label, class: className, reveal = 'slide-up' } = Astro.props;
+const { accent, label, class: className, reveal } = Astro.props;
 ---
 
-<div class:list={['pixel-panel', `pixel-panel--${accent}`, className]} data-reveal={reveal}>
+<div
+  class:list={['pixel-panel', `pixel-panel--${accent}`, className]}
+  data-reveal={reveal}
+>
   {label && (
     <div class:list={['panel-label', `panel-label--${accent}`]}>
       {label}

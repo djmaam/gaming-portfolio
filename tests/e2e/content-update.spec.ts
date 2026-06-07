@@ -1,11 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './_fixtures';
 
 test.use({ colorScheme: 'dark' });
 
 test.beforeEach(async ({ page }) => {
   // Pre-seed all nodes as visited so progressive disclosure doesn't hide content
-  // reduce-motion → bypass GP-20 panel reveal (panels visible without scroll)
-  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(() => {
     sessionStorage.setItem('gp-visited-nodes', JSON.stringify([1, 2, 3, 4]));
   });

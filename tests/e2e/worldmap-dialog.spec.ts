@@ -1,9 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './_fixtures';
 
 test.beforeEach(async ({ page }) => {
   // Skip boot/title so we land directly in EXPLORE with world map active
-  // reduce-motion → bypass GP-20 panel reveal (panels visible without scroll)
-  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(() => sessionStorage.setItem('gp-booted', '1'));
   await page.goto('/');
   // Wait for the world map timeline to be present (static HTML, no hydration needed)

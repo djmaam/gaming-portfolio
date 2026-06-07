@@ -55,6 +55,20 @@ const stars = Array.from({ length: 54 }, (_, i) => {
 
     <!-- Favicon placeholder — replace with pixel coin/hero sprite -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- GP-20 reveal arming: set gp-armed synchronously so panel-reveal CSS
+         only hides panels when JS is parseable AND motion is allowed.
+         Falls back to gp-reveal-fallback after 1.5s if hydration stalls,
+         force-revealing every panel so client:idle delays don't leave
+         above-the-fold content blank. -->
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        d.classList.add('gp-armed');
+        setTimeout(function () { d.classList.add('gp-reveal-fallback'); }, 1500);
+      })();
+    </script>
   </head>
 
   <body>

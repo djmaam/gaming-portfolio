@@ -1,8 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './_fixtures';
 
 test.beforeEach(async ({ page }) => {
-  // reduce-motion → bypass GP-20 panel reveal (panels visible without scroll)
-  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(() => {
     sessionStorage.setItem('gp-booted', '1');
     sessionStorage.removeItem('gp-visited-nodes');
@@ -37,6 +35,7 @@ test.describe('HUD live game stats', () => {
     const ctx = await browser.newContext();
     try {
       const page = await ctx.newPage();
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.addInitScript(() => {
         sessionStorage.setItem('gp-booted', '1');
         sessionStorage.setItem('gp-visited-nodes', JSON.stringify([1, 2]));
@@ -54,6 +53,7 @@ test.describe('HUD live game stats', () => {
     const ctx = await browser.newContext();
     try {
       const page = await ctx.newPage();
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.addInitScript(() => {
         sessionStorage.setItem('gp-booted', '1');
         sessionStorage.setItem('gp-visited-nodes', JSON.stringify([1, 2, 3, 4]));

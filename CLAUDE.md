@@ -2,6 +2,27 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+# 8-Bit Portfolio: Spec-Driven Development (SDD) Workflow
+
+This project strictly follows an SDD methodology managed via Linear, CodeGraph, and the Superpowers plugin. Never write implementation code without a failing test and a linked Linear ticket.
+
+## 1. Project Context
+- Use `codegraph_explore` via MCP to traverse the project's Abstract Syntax Tree (AST) before proposing or modifying architecture. Do not blind-read files.
+
+## 2. Planning Phase
+When the user asks to brainstorm or plan a feature:
+- Use `/superpowers:brainstorm` to clarify game logic and mechanics.
+- Use `/superpowers:write-plan` and the Linear MCP tools (`create_issue`) to generate tickets in the project.
+- YOU MUST include a strict testing specification in the description of every created Linear issue.
+
+## 3. Execution Phase
+When the user asks to implement a ticket:
+- Use Linear tools to fetch the assigned issue.
+- Identify the Linear Issue ID (e.g., `PORT-12`).
+- YOU MUST name the git branch starting with the Issue ID (format: `PORT-12-feature-name`).
+- YOU MUST include the Issue ID at the beginning of the Pull Request title to trigger GitHub-Linear auto-linking.
+- Use `/superpowers:execute-plan` to spawn a subagent that will write the test, implement the code to pass it, and open the PR.
+
 ## Package Manager
 
 Always use `bun`. Never `npm` or `yarn`.

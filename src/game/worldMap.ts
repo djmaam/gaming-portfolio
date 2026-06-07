@@ -240,8 +240,11 @@ export function mount(): () => void {
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup',   onKeyUp);
 
+  // Desktop click: gate by hero proximity — encrypted nodes require the player
+  // to walk to them before they unlock. Keyboard Tab+Enter falls through to
+  // onKeyDown which already checks activeNode.
   const nodeClickCleanups = nodeButtons.map((btn, i) => {
-    const h = () => openDialog(i);
+    const h = () => { if (activeNode === i) openDialog(i); };
     btn.addEventListener('click', h);
     return () => btn.removeEventListener('click', h);
   });
@@ -290,7 +293,7 @@ export function mount(): () => void {
     }
 
     prompt.hidden = activeNode === -1;
-    if (activeNode !== -1) prompt.style.top = `${heroY + 20}px`;
+    if (activeNode !== -1) prompt.style.top = `${nodeYs[activeNode] + 22}px`;
   }
 
   return () => {

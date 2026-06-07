@@ -49,13 +49,12 @@ test.describe('WorldMap progressive disclosure', () => {
     await expect(card1.locator('.wm-card__content')).toBeVisible();
   });
 
-  test('opening dialog for node 1 reveals card 1', async ({ page }) => {
-    await page.locator('.wm-node[data-job-index="1"]').click();
-    await expect(page.locator('.wm-dialog-panel')).toBeVisible({ timeout: 5_000 });
-    await page.locator('.wm-dialog__btn--close').click();
-    const card1 = page.locator('.wm-card[data-job-index="1"]');
-    await expect(card1).not.toHaveClass(/wm-card--hidden/);
-    await expect(card1.locator('.wm-card__content')).toBeVisible();
+  test('clicking inactive (encrypted) node does not open dialog or reveal card', async ({ page }) => {
+    // Hero starts at node 0 → only node 0 is active. Node 2 click must be no-op.
+    await page.locator('.wm-node[data-job-index="2"]').click();
+    await expect(page.locator('.wm-dialog-panel')).not.toBeVisible();
+    const card2 = page.locator('.wm-card[data-job-index="2"]');
+    await expect(card2).toHaveClass(/wm-card--hidden/);
   });
 
   test('card 1 starts revealed when gp-visited-nodes=[1] in sessionStorage', async ({ browser }) => {

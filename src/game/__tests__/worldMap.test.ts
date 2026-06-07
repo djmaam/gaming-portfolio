@@ -257,14 +257,22 @@ describe('worldMap — progressive disclosure', () => {
     }
   });
 
-  it('clicking node 1 reveals card 1 and persists index to sessionStorage', () => {
+  it('opening dialog for node 1 reveals card 1 and persists index to sessionStorage', () => {
     const { nodes, cards } = buildDOMWithCards();
     cleanup = mount();
-    nodes[1].click();
+    nodes[0].click(); // hero starts at node 0; click works
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     expect(cards[1].classList.contains('wm-card--hidden')).toBe(false);
     expect(cards[1].classList.contains('wm-card--revealed')).toBe(true);
     const stored = JSON.parse(sessionStorage.getItem('gp-visited-nodes') ?? '[]') as number[];
     expect(stored).toContain(1);
+  });
+
+  it('click on inactive node (not in hero proximity) does not open dialog', () => {
+    const { nodes } = buildDOMWithCards();
+    cleanup = mount();
+    nodes[2].click(); // hero is at node 0, node 2 is inactive
+    expect(document.querySelector('.wm-dialog-panel')).toBeNull();
   });
 
   it('on remount, previously visited cards start revealed not hidden', () => {
@@ -311,7 +319,9 @@ describe('worldMap — progressive disclosure', () => {
     const { nodes } = buildDOMWithCards();
     cleanup = mount();
     const spy = vi.spyOn(Storage.prototype, 'setItem');
-    nodes[1].click(); // already visited
+    nodes[0].click(); // open dialog at node 0
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' })); // nav to 1
+    // Index 1 already visited → markVisited(1) early-returns without setItem
     expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
   });

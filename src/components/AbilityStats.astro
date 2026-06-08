@@ -1,26 +1,24 @@
 ---
 import PixelPanel from './PixelPanel.astro';
 import { portfolio } from '../data/portfolio';
-
-const CELL_COLORS = ['var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-yellow)', 'var(--c-yellow)', 'var(--c-red)', 'var(--c-red)'];
+import { ABILITY_CELL_COLORS } from '../data/abilityColors';
 ---
 
 <PixelPanel accent="red" label="ABILITY STATS" class="ability-stats" reveal="slide-up">
   <div class="stats-list">
     {portfolio.stats.map(stat => {
-      const filled = Math.round(stat.lvl / 10);
-      const lv = Math.round(stat.lvl / 10);
+      const cells = Math.round(stat.lvl / 10);
       return (
-        <div class="stat-row">
+        <div class="stat-row" data-lvl={cells}>
           <div class="stat-row__header">
             <span class="stat-row__label">{stat.label}</span>
-            <span class="stat-row__lv">LV{lv}</span>
+            <span class="stat-row__lv">LV{cells}</span>
           </div>
-          <div class="stat-row__bar" role="meter" aria-label={`${stat.label} level ${lv}`} aria-valuenow={stat.lvl} aria-valuemin={0} aria-valuemax={100}>
+          <div class="stat-row__bar" role="meter" aria-label={`${stat.label} level ${cells}`} aria-valuenow={stat.lvl} aria-valuemin={0} aria-valuemax={100}>
             {Array.from({ length: 10 }, (_, i) => (
               <div
-                class:list={['stat-cell', i < filled && 'stat-cell--filled']}
-                style={i < filled ? `background:${CELL_COLORS[i]}` : ''}
+                class:list={['stat-cell', i < cells && 'stat-cell--filled']}
+                style={i < cells ? `background:${ABILITY_CELL_COLORS[i]}` : ''}
               />
             ))}
           </div>

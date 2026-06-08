@@ -14,6 +14,12 @@ interface EntryCtx {
   active: boolean;
   index: number;
   onClick: () => void;
+  onKeydown: (e: KeyboardEvent) => void;
+}
+
+function toggleEntry(el: HTMLElement): void {
+  const expanded = el.classList.toggle(EXPANDED_CLASS);
+  el.setAttribute('aria-expanded', expanded ? 'true' : 'false');
 }
 
 function readEntries(panel: HTMLElement): EntryCtx[] {
@@ -26,7 +32,14 @@ function readEntries(panel: HTMLElement): EntryCtx[] {
       noteText: note?.textContent ?? '',
       active:   el.getAttribute('data-quest-active') === 'true',
       index:    Number.isFinite(raw) ? raw : fallbackIdx,
-      onClick:  () => el.classList.toggle(EXPANDED_CLASS),
+      onClick:  () => toggleEntry(el),
+      // role="button" elements need explicit Enter/Space handling — unlike
+      // native <button>, they don't synthesize click on keyboard activation.
+      onKeydown: (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        toggleEntry(el);
+      },
     };
   });
 }
@@ -50,7 +63,10 @@ export function mount(): () => void {
   let revealMO: MutationObserver | null = null;
   let usedFallback = false;
 
-  entries.forEach(ctx => ctx.el.addEventListener('click', ctx.onClick));
+  entries.forEach(ctx => {
+    ctx.el.addEventListener('click', ctx.onClick);
+    ctx.el.addEventListener('keydown', ctx.onKeydown);
+  });
 
   function typeOut(ctx: EntryCtx, i: number): void {
     if (!ctx.note) return;
@@ -116,6 +132,9 @@ export function mount(): () => void {
     cleanupIO();
     revealMO?.disconnect();
     timers.clear();
-    entries.forEach(ctx => ctx.el.removeEventListener('click', ctx.onClick));
+    entries.forEach(ctx => {
+      ctx.el.removeEventListener('click', ctx.onClick);
+      ctx.el.removeEventListener('keydown', ctx.onKeydown);
+    });
   };
 }

@@ -27,6 +27,9 @@ function buildPanel(
     entry.className = 'quest-entry';
     entry.setAttribute('data-quest-index', String(idx));
     entry.setAttribute('data-quest-active', q.active ? 'true' : 'false');
+    entry.setAttribute('role', 'button');
+    entry.setAttribute('tabindex', '0');
+    entry.setAttribute('aria-expanded', 'false');
 
     const header = document.createElement('div');
     header.className = 'quest-entry__header';
@@ -191,7 +194,7 @@ describe('questLog — typewriter', () => {
   });
 });
 
-describe('questLog — click expand', () => {
+describe('questLog — toggle expand', () => {
   it('clicking an entry toggles the expanded class', () => {
     const { entries } = buildPanel([{ title: 'Q', note: 'n' }]);
     mount();
@@ -199,6 +202,40 @@ describe('questLog — click expand', () => {
     entries[0].click();
     expect(entries[0].classList.contains(EXPANDED_CLASS)).toBe(true);
     entries[0].click();
+    expect(entries[0].classList.contains(EXPANDED_CLASS)).toBe(false);
+  });
+
+  it('click keeps aria-expanded in sync with the expanded class', () => {
+    const { entries } = buildPanel([{ title: 'Q', note: 'n' }]);
+    mount();
+    expect(entries[0].getAttribute('aria-expanded')).toBe('false');
+    entries[0].click();
+    expect(entries[0].getAttribute('aria-expanded')).toBe('true');
+    entries[0].click();
+    expect(entries[0].getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('Enter key on a focused entry toggles expand', () => {
+    const { entries } = buildPanel([{ title: 'Q', note: 'n' }]);
+    mount();
+    entries[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(entries[0].classList.contains(EXPANDED_CLASS)).toBe(true);
+    expect(entries[0].getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('Space key on a focused entry toggles expand and prevents default scroll', () => {
+    const { entries } = buildPanel([{ title: 'Q', note: 'n' }]);
+    mount();
+    const ev = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+    entries[0].dispatchEvent(ev);
+    expect(entries[0].classList.contains(EXPANDED_CLASS)).toBe(true);
+    expect(ev.defaultPrevented).toBe(true);
+  });
+
+  it('other keys do not toggle', () => {
+    const { entries } = buildPanel([{ title: 'Q', note: 'n' }]);
+    mount();
+    entries[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true }));
     expect(entries[0].classList.contains(EXPANDED_CLASS)).toBe(false);
   });
 });
@@ -256,11 +293,13 @@ describe('questLog — cleanup', () => {
     expect(entries[2].classList.contains(VISIBLE_CLASS)).toBe(false);
   });
 
-  it('cleanup removes click listeners', () => {
+  it('cleanup removes click and keydown listeners', () => {
     const { entries } = buildPanel([{ title: 'Q', note: 'n' }]);
     const cleanup = mount();
     cleanup();
     entries[0].click();
+    entries[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     expect(entries[0].classList.contains(EXPANDED_CLASS)).toBe(false);
+    expect(entries[0].getAttribute('aria-expanded')).toBe('false');
   });
 });

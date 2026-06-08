@@ -1,5 +1,7 @@
 import { REVEALED_CLASS as PANEL_REVEALED_CLASS } from './panelReveal';
 import { ABILITY_CELL_COLORS } from '../data/abilityColors';
+import { createStaggerSet } from './lib/staggerTimers';
+import { mountIntersection } from './lib/intersectionMount';
 
 export const ANIM_MS      = 600;
 export const STAGGER_MS   = 80;
@@ -58,19 +60,13 @@ export function mount(): () => void {
   if (!panel) return () => {};
 
   const rows = readRows(panel);
-  const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (isReduced || typeof IntersectionObserver === 'undefined') {
-    rows.forEach(r => paintRow(r, r.target));
-    return () => {};
-  }
-
-  rows.forEach(r => paintRow(r, 0));
-
-  const timers = new Set<ReturnType<typeof setTimeout>>();
+  const timers = createStaggerSet();
   const active = new Set<RowCtx>();
   let rafId = 0;
   let pausedAt = 0;
+  let armed = false;
+  let revealMO: MutationObserver | null = null;
+  let usedFallback = false;
 
   function tick(now: number): void {
     // Background tabs throttle rAF to ~1 Hz and would otherwise produce a
@@ -100,15 +96,8 @@ export function mount(): () => void {
   function scheduleAll(): void {
     rows.forEach((ctx, i) => {
       if (ctx.done || ctx.started) return;
-      if (i === 0) {
-        startRow(ctx);
-      } else {
-        const tid = setTimeout(() => {
-          timers.delete(tid);
-          startRow(ctx);
-        }, i * STAGGER_MS);
-        timers.add(tid);
-      }
+      if (i === 0) startRow(ctx);
+      else timers.schedule(() => startRow(ctx), i * STAGGER_MS);
     });
   }
 
@@ -116,9 +105,6 @@ export function mount(): () => void {
   // panelReveal exposes the panel (otherwise abilityStats' IO can resolve
   // first, run the entire animation while visibility:hidden, then 'played'
   // blocks replay).
-  let armed = false;
-  let revealMO: MutationObserver | null = null;
-
   function armIfNeeded(): void {
     if (armed) return;
     armed = true;
@@ -136,14 +122,20 @@ export function mount(): () => void {
     revealMO.observe(panel!, { attributes: true, attributeFilter: ['class'] });
   }
 
-  const io = new IntersectionObserver((entries) => {
+  const cleanupIO = mountIntersection([panel], (entries, io) => {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
       io.unobserve(entry.target);
       armIfNeeded();
     }
+  }, () => {
+    usedFallback = true;
+    rows.forEach(r => paintRow(r, r.target));
   });
-  io.observe(panel);
+
+  if (usedFallback) return cleanupIO;
+
+  rows.forEach(r => paintRow(r, 0));
 
   function onVisibility(): void {
     if (document.visibilityState === 'hidden') {
@@ -162,10 +154,9 @@ export function mount(): () => void {
   document.addEventListener('visibilitychange', onVisibility);
 
   return () => {
-    io.disconnect();
+    cleanupIO();
     revealMO?.disconnect();
     document.removeEventListener('visibilitychange', onVisibility);
-    timers.forEach(clearTimeout);
     timers.clear();
     cancelAnimationFrame(rafId);
     active.clear();

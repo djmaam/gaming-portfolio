@@ -1,7 +1,9 @@
+import { createStaggerSet } from './lib/staggerTimers';
+import { mountIntersection } from './lib/intersectionMount';
+
 export const REVEALED_CLASS = 'panel--revealed';
 export const STAGGER_MS     = 60;
 export const ROW_TOLERANCE_PX = 16;
-const THRESHOLD             = 0;
 
 function revealAll(panels: HTMLElement[]): void {
   panels.forEach(p => p.classList.add(REVEALED_CLASS));
@@ -9,17 +11,9 @@ function revealAll(panels: HTMLElement[]): void {
 
 export function mount(): () => void {
   const panels = Array.from(document.querySelectorAll<HTMLElement>('.pixel-panel[data-reveal]'));
-  if (!panels.length) return () => {};
+  const timers = createStaggerSet();
 
-  const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (isReduced || typeof IntersectionObserver === 'undefined') {
-    revealAll(panels);
-    return () => {};
-  }
-
-  const timers = new Set<ReturnType<typeof setTimeout>>();
-
-  const io = new IntersectionObserver((entries) => {
+  const cleanupIO = mountIntersection(panels, (entries, io) => {
     const visible = entries
       .filter(e => e.isIntersecting && !e.target.classList.contains(REVEALED_CLASS))
       .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
@@ -39,20 +33,13 @@ export function mount(): () => void {
       if (rowIdx === 0) {
         el.classList.add(REVEALED_CLASS);
       } else {
-        const tid = setTimeout(() => {
-          timers.delete(tid);
-          el.classList.add(REVEALED_CLASS);
-        }, rowIdx * STAGGER_MS);
-        timers.add(tid);
+        timers.schedule(() => el.classList.add(REVEALED_CLASS), rowIdx * STAGGER_MS);
       }
     }
-  }, { threshold: THRESHOLD });
-
-  panels.forEach(p => io.observe(p));
+  }, revealAll);
 
   return () => {
-    io.disconnect();
-    timers.forEach(clearTimeout);
+    cleanupIO();
     timers.clear();
   };
 }

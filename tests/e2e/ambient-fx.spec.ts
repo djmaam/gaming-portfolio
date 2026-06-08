@@ -15,11 +15,15 @@ test.describe('ambient CRT effects — motion allowed', () => {
     await expect(page.locator('#crt-overlay')).toBeVisible();
   });
 
-  test('hovering a pixel-panel applies the glitch class then removes it', async ({ page }) => {
+  test('hovering a pixel-panel applies the glitch class, mouseleave strips it immediately', async ({ page }) => {
     const panel = page.locator('.pixel-panel').first();
     await panel.hover();
     await expect(panel).toHaveClass(/pixel-panel--glitch/, { timeout: 1_000 });
-    await page.locator('body').hover({ position: { x: 0, y: 0 } });
+    // Dispatching mouseleave directly avoids the prior page.locator('body')
+    // hover-at-(0,0) approach, where the body coordinate could still land
+    // inside the panel and the assertion would pass via the 200ms auto-
+    // remove timer instead of the actual onLeave path.
+    await panel.evaluate(el => el.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false })));
     await expect(panel).not.toHaveClass(/pixel-panel--glitch/);
   });
 });

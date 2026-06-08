@@ -2,6 +2,7 @@ export const OVERLAY_ID         = 'crt-overlay';
 export const GLITCH_CLASS       = 'pixel-panel--glitch';
 export const GLITCH_HOLD_MS     = 200;
 export const GLITCH_COOLDOWN_MS = 3000;
+const WIRED_ATTR                = 'data-ambient-glitch';
 
 interface PanelCtx {
   el: HTMLElement;
@@ -36,9 +37,17 @@ export function mount(): () => void {
     document.body.appendChild(overlay);
   }
 
+  // Per-element wiring marker. Lets a second mount() (React StrictMode
+  // double-invoke or any re-mount before prior cleanup) skip panels that
+  // already carry our listeners — avoiding double-firing of onEnter and
+  // duplicate timers. Cleanup unsets the marker.
   const panels = Array.from(document.querySelectorAll<HTMLElement>('.pixel-panel'));
+  const ctxs: PanelCtx[] = [];
 
-  const ctxs: PanelCtx[] = panels.map(el => {
+  panels.forEach(el => {
+    if (el.getAttribute(WIRED_ATTR) === '1') return;
+    el.setAttribute(WIRED_ATTR, '1');
+
     const ctx: PanelCtx = {
       el,
       inCooldown:    false,
@@ -55,8 +64,10 @@ export function mount(): () => void {
         el.classList.remove(GLITCH_CLASS);
         ctx.removeTimer = null;
       }, GLITCH_HOLD_MS);
-      // Hold the cooldown for a few seconds after the glitch finishes so the
-      // effect stays subtle even when the cursor stays over the panel.
+      // Hold the cooldown a few seconds past the visible glitch so the
+      // effect stays subtle even when the cursor lingers over the panel.
+      // onLeave intentionally does NOT cancel cooldownTimer — once a panel
+      // has glitched, it stays "spent" for the full cooldown window.
       ctx.cooldownTimer = setTimeout(() => {
         ctx.inCooldown = false;
         ctx.cooldownTimer = null;
@@ -69,12 +80,9 @@ export function mount(): () => void {
         ctx.removeTimer = null;
       }
     };
-    return ctx;
-  });
-
-  ctxs.forEach(ctx => {
-    ctx.el.addEventListener('mouseenter', ctx.onEnter);
-    ctx.el.addEventListener('mouseleave', ctx.onLeave);
+    el.addEventListener('mouseenter', ctx.onEnter);
+    el.addEventListener('mouseleave', ctx.onLeave);
+    ctxs.push(ctx);
   });
 
   return () => {
@@ -84,6 +92,10 @@ export function mount(): () => void {
     ctxs.forEach(ctx => {
       ctx.el.removeEventListener('mouseenter', ctx.onEnter);
       ctx.el.removeEventListener('mouseleave', ctx.onLeave);
+      // Strip any in-flight glitch class so a cleanup mid-glitch can't
+      // leave the panel stuck with translateX shifted forever.
+      ctx.el.classList.remove(GLITCH_CLASS);
+      ctx.el.removeAttribute(WIRED_ATTR);
       clearPending(ctx);
     });
   };

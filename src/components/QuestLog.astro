@@ -13,6 +13,30 @@ import { portfolio } from '../data/portfolio';
       </p>
     </div>
   </div>
+
+  <div class="quest-entries">
+    {portfolio.quests.map((quest, idx) => {
+      const active = quest.status === 'ACTIVE';
+      return (
+        <article
+          class="quest-entry"
+          data-quest-index={idx}
+          data-quest-active={active ? 'true' : 'false'}
+          role="button"
+          tabindex="0"
+          aria-expanded="false"
+        >
+          <div class="quest-entry__header">
+            <span class="quest-entry__title">{quest.title}</span>
+            <span class={`quest-entry__status ${active ? 'is-active' : 'is-complete'}`}>
+              {active ? '▶ ACTIVE' : '✓ COMPLETE'}
+            </span>
+          </div>
+          <p class="quest-entry__note">{quest.note}</p>
+        </article>
+      );
+    })}
+  </div>
 </PixelPanel>
 
 <style>
@@ -54,5 +78,84 @@ import { portfolio } from '../data/portfolio';
   .quest-log__cursor {
     margin-left: 4px;
     color: var(--c-yellow);
+  }
+
+  .quest-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 2px solid color-mix(in srgb, var(--c-blue) 35%, transparent);
+  }
+
+  .quest-entry {
+    background: color-mix(in srgb, var(--c-blue) 10%, transparent);
+    border: 2px solid color-mix(in srgb, var(--c-blue) 28%, transparent);
+    padding: 10px 12px;
+    cursor: pointer;
+    font-family: 'Silkscreen', monospace;
+    color: var(--c-ink);
+  }
+
+  .quest-entry__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .quest-entry__title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: var(--c-blue);
+    letter-spacing: 0.5px;
+  }
+
+  .quest-entry__status {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .quest-entry__status.is-active   { color: var(--c-green); }
+  .quest-entry__status.is-complete { color: var(--c-faint); }
+
+  .quest-entry__note {
+    font-size: var(--fs-bio);
+    line-height: 1.5;
+    margin: 8px 0 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 220ms ease, margin-top 220ms ease;
+  }
+
+  .quest-entry--expanded .quest-entry__note {
+    max-height: 200px;
+    margin-top: 8px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.gp-armed) .quest-entry {
+      opacity: 0;
+      transform: translateX(-12px);
+      transition: opacity 320ms ease, transform 320ms ease;
+    }
+    :global(.gp-armed) .quest-entry.quest-entry--visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    :global(.gp-reveal-fallback) .quest-entry {
+      opacity: 1;
+      transform: none;
+    }
+    .quest-entry--visible .quest-entry__status.is-active {
+      animation: quest-status-flash 0.5s steps(2, end) 1;
+    }
+  }
+
+  @keyframes quest-status-flash {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.2; }
   }
 </style>

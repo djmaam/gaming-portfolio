@@ -5,6 +5,12 @@ export interface Perk {
   description: string;
 }
 
+export interface Quest {
+  title: string;
+  status: 'ACTIVE' | 'COMPLETE';
+  note: string;
+}
+
 export interface Experience {
   year: string;
   company: string;
@@ -32,6 +38,28 @@ export const portfolio = {
   contact: {
     cta: "Have a project in mind or looking to accelerate your team's velocity? I design solid architectures, automate development pipelines with AI, and build user-focused products. Drop me a message in the terminal below or connect through my networks. Let's talk!",
   },
+  quests: [
+    {
+      title:  'SHIP 8-BIT PORTFOLIO V1',
+      status: 'ACTIVE',
+      note:   'Build a playable RPG portfolio in Astro + React with mount/cleanup game modules and end-to-end Playwright coverage.',
+    },
+    {
+      title:  'LEAD NERA FINTECH ARCHITECTURE',
+      status: 'ACTIVE',
+      note:   'Spec-driven autonomous agent pipelines turning Linear stories into shippable code for an agricultural lending platform.',
+    },
+    {
+      title:  'AI-DRIVEN DEV WORKFLOW',
+      status: 'COMPLETE',
+      note:   'Co-created an internal SDD methodology: spec extraction, ephemeral GitHub workspaces, autonomous execution + E2E gates.',
+    },
+    {
+      title:  'MULTI-PLATFORM STREAMING APPS',
+      status: 'COMPLETE',
+      note:   'Tplay streaming across Web, Mobile, Android TV, Tizen, WebOS & VIDAA OS with native Kotlin / Swift bridges.',
+    },
+  ] as Quest[],
   perks: [
     {
       icon: "⚙️",

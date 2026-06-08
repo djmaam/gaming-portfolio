@@ -1,57 +1,56 @@
+import { REVEALED_CLASS as PANEL_REVEALED_CLASS } from './panelReveal';
+import { ABILITY_CELL_COLORS } from '../data/abilityColors';
+
 export const ANIM_MS      = 600;
 export const STAGGER_MS   = 80;
 export const FILLED_CLASS = 'stat-cell--filled';
-
-const CELL_COLORS = [
-  'var(--c-green)', 'var(--c-green)', 'var(--c-green)', 'var(--c-green)',
-  'var(--c-green)', 'var(--c-green)', 'var(--c-yellow)', 'var(--c-yellow)',
-  'var(--c-red)',   'var(--c-red)',
-];
+const CELL_COUNT          = 10;
 
 interface RowCtx {
   row: HTMLElement;
+  bar: HTMLElement | null;
   cells: HTMLElement[];
-  lvEl: HTMLElement;
+  lvEl: HTMLElement | null;
   target: number;
-  played: boolean;
+  lastFilled: number;
+  started: boolean;
+  done: boolean;
+  startedAt: number;
 }
 
 function readRows(panel: HTMLElement): RowCtx[] {
   return Array.from(panel.querySelectorAll<HTMLElement>('.stat-row')).map(row => {
     const raw = parseInt(row.getAttribute('data-lvl') ?? '', 10);
-    const target = Math.max(0, Math.min(10, Number.isFinite(raw) ? raw : 0));
+    const target = Math.max(0, Math.min(CELL_COUNT, Number.isFinite(raw) ? raw : 0));
     return {
       row,
-      cells: Array.from(row.querySelectorAll<HTMLElement>('.stat-cell')),
-      lvEl:  row.querySelector<HTMLElement>('.stat-row__lv')!,
+      bar:        row.querySelector<HTMLElement>('.stat-row__bar'),
+      cells:      Array.from(row.querySelectorAll<HTMLElement>('.stat-cell')),
+      lvEl:       row.querySelector<HTMLElement>('.stat-row__lv'),
       target,
-      played: false,
+      lastFilled: -1,
+      started:    false,
+      done:       false,
+      startedAt:  0,
     };
   });
 }
 
 function paintRow(ctx: RowCtx, filled: number): void {
+  if (filled === ctx.lastFilled) return;
   for (let i = 0; i < ctx.cells.length; i++) {
     const cell = ctx.cells[i];
     if (i < filled) {
-      if (!cell.classList.contains(FILLED_CLASS)) {
-        cell.classList.add(FILLED_CLASS);
-        cell.style.background = CELL_COLORS[i] ?? '';
-      }
-    } else if (cell.classList.contains(FILLED_CLASS)) {
+      cell.classList.add(FILLED_CLASS);
+      cell.style.background = ABILITY_CELL_COLORS[i] ?? '';
+    } else {
       cell.classList.remove(FILLED_CLASS);
       cell.style.background = '';
     }
   }
-  ctx.lvEl.textContent = `LV${filled}`;
-}
-
-function resetRow(ctx: RowCtx): void {
-  paintRow(ctx, 0);
-}
-
-function finalizeRow(ctx: RowCtx): void {
-  paintRow(ctx, ctx.target);
+  if (ctx.lvEl) ctx.lvEl.textContent = `LV${filled}`;
+  if (ctx.bar)  ctx.bar.setAttribute('aria-valuenow', String(filled * 10));
+  ctx.lastFilled = filled;
 }
 
 export function mount(): () => void {
@@ -62,66 +61,113 @@ export function mount(): () => void {
   const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (isReduced || typeof IntersectionObserver === 'undefined') {
-    rows.forEach(finalizeRow);
+    rows.forEach(r => paintRow(r, r.target));
     return () => {};
   }
 
-  rows.forEach(resetRow);
+  rows.forEach(r => paintRow(r, 0));
 
   const timers = new Set<ReturnType<typeof setTimeout>>();
-  let rafId = 0;
   const active = new Set<RowCtx>();
-  const startedAt = new WeakMap<RowCtx, number>();
+  let rafId = 0;
+  let pausedAt = 0;
 
   function tick(now: number): void {
+    // Background tabs throttle rAF to ~1 Hz and would otherwise produce a
+    // single giant jump that snaps progress to 1 — match worldMap.ts and
+    // exit until visibilitychange wakes us back up.
+    if (document.visibilityState === 'hidden') { rafId = 0; return; }
     for (const ctx of active) {
-      const t0 = startedAt.get(ctx) ?? now;
-      const progress = Math.min(1, (now - t0) / ANIM_MS);
-      const filled = Math.floor(progress * ctx.target);
-      paintRow(ctx, progress >= 1 ? ctx.target : filled);
+      const progress = Math.max(0, Math.min(1, (now - ctx.startedAt) / ANIM_MS));
+      const filled = progress >= 1 ? ctx.target : Math.floor(progress * ctx.target);
+      paintRow(ctx, filled);
       if (progress >= 1) {
         active.delete(ctx);
-        ctx.played = true;
+        ctx.done = true;
       }
     }
-    if (active.size > 0) rafId = requestAnimationFrame(tick);
-    else rafId = 0;
+    rafId = active.size > 0 ? requestAnimationFrame(tick) : 0;
   }
 
   function startRow(ctx: RowCtx): void {
-    if (ctx.played || active.has(ctx)) return;
-    startedAt.set(ctx, performance.now());
+    if (ctx.done || ctx.started) return;
+    ctx.started = true;
+    ctx.startedAt = performance.now();
     active.add(ctx);
     if (rafId === 0) rafId = requestAnimationFrame(tick);
+  }
+
+  function scheduleAll(): void {
+    rows.forEach((ctx, i) => {
+      if (ctx.done || ctx.started) return;
+      if (i === 0) {
+        startRow(ctx);
+      } else {
+        const tid = setTimeout(() => {
+          timers.delete(tid);
+          startRow(ctx);
+        }, i * STAGGER_MS);
+        timers.add(tid);
+      }
+    });
+  }
+
+  // Gate the count-up on panel--revealed so the animation plays AFTER
+  // panelReveal exposes the panel (otherwise abilityStats' IO can resolve
+  // first, run the entire animation while visibility:hidden, then 'played'
+  // blocks replay).
+  let armed = false;
+  let revealMO: MutationObserver | null = null;
+
+  function armIfNeeded(): void {
+    if (armed) return;
+    armed = true;
+    if (panel!.classList.contains(PANEL_REVEALED_CLASS)) {
+      scheduleAll();
+      return;
+    }
+    revealMO = new MutationObserver(() => {
+      if (panel!.classList.contains(PANEL_REVEALED_CLASS)) {
+        revealMO?.disconnect();
+        revealMO = null;
+        scheduleAll();
+      }
+    });
+    revealMO.observe(panel!, { attributes: true, attributeFilter: ['class'] });
   }
 
   const io = new IntersectionObserver((entries) => {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
-      rows.forEach((ctx, i) => {
-        if (ctx.played || active.has(ctx)) return;
-        if (i === 0) {
-          startRow(ctx);
-        } else {
-          const tid = setTimeout(() => {
-            timers.delete(tid);
-            startRow(ctx);
-          }, i * STAGGER_MS);
-          timers.add(tid);
-        }
-      });
       io.unobserve(entry.target);
+      armIfNeeded();
     }
   });
-
   io.observe(panel);
+
+  function onVisibility(): void {
+    if (document.visibilityState === 'hidden') {
+      pausedAt = performance.now();
+      return;
+    }
+    if (pausedAt > 0) {
+      // Shift every active row's startedAt forward by the pause length so
+      // progress continues from where it left off instead of jumping to 1.
+      const skip = performance.now() - pausedAt;
+      for (const ctx of active) ctx.startedAt += skip;
+      pausedAt = 0;
+    }
+    if (active.size > 0 && rafId === 0) rafId = requestAnimationFrame(tick);
+  }
+  document.addEventListener('visibilitychange', onVisibility);
 
   return () => {
     io.disconnect();
+    revealMO?.disconnect();
+    document.removeEventListener('visibilitychange', onVisibility);
     timers.forEach(clearTimeout);
     timers.clear();
-    if (rafId !== 0) cancelAnimationFrame(rafId);
-    rafId = 0;
+    cancelAnimationFrame(rafId);
     active.clear();
   };
 }

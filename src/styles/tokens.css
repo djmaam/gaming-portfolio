@@ -93,6 +93,42 @@
     from { opacity: 0; }
     to   { opacity: 1; }
   }
+
+  @keyframes panel-glitch {
+    0%   { transform: translateX(0); }
+    20%  { transform: translateX(-2px); }
+    40%  { transform: translateX(2px); }
+    60%  { transform: translateX(-1px); }
+    80%  { transform: translateX(1px); }
+    100% { transform: translateX(0); }
+  }
+
+  /* steps(5, end) samples progress at 0/0.2/0.4/0.6/0.8/1 → hits each
+     keyframe exactly once, producing 5 discrete jitter positions over
+     0.2s. steps(1, end) would collapse the keyframes (only 0% + 100%
+     are sampled, both translateX(0)) and render the glitch invisibly. */
+  .pixel-panel.pixel-panel--glitch {
+    animation: panel-glitch 0.2s steps(5, end) 1;
+  }
+
+  /* The base scanline texture is already SSR-rendered by Base.astro's
+     .scanlines div (z-index 9). #crt-overlay layers a subtle darkening
+     tint above it with a slow flicker — no scanline gradient here to
+     avoid stacking the same pattern twice. */
+  #crt-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.03);
+    animation: crt-flicker 6s linear infinite;
+  }
+
+  @keyframes crt-flicker {
+    0%, 92%, 96%, 100% { opacity: 0.9; }
+    93%                { opacity: 0.6; }
+    95%                { opacity: 1;   }
+  }
 }
 
 /* Global resets */

@@ -4,6 +4,7 @@ import { mount as mountCursor } from './menuCursor';
 import { mount as mountWorldMap } from './worldMap';
 import { mount as mountGameStats } from './gameStats';
 import { mount as mountAbilityStats } from './abilityStats';
+import { mount as mountQuestLog } from './questLog';
 import { mount as mountPanelReveal } from './panelReveal';
 import './GameLayer.css';
 
@@ -63,7 +64,7 @@ export default function GameLayer() {
     // Mount order: stats first (HUD listeners), then cursor/worldMap (DOM
     // measurements), then panelReveal LAST so above-the-fold panels reveal
     // immediately on IO auto-fire after siblings have settled their layout.
-    const mounts = [mountGameStats, mountCursor, mountWorldMap, mountAbilityStats, mountPanelReveal];
+    const mounts = [mountGameStats, mountCursor, mountWorldMap, mountAbilityStats, mountQuestLog, mountPanelReveal];
     const cleanups = mounts.map(m => m());
     return () => { cleanups.forEach(c => c()); };
   }, [state]);
